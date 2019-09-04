@@ -1,10 +1,7 @@
-
-%% 3.1.2
-
 %training data
 n = 100;
-mA = [ 1.8, 0.8]; sigmaA = 0.5;
-mB = [-1.8, -0.8]; sigmaB = 0.5;
+mA = [ 1.35, 0.35]; sigmaA = 0.52;
+mB = [0.45, -0.35]; sigmaB = 0.52;
 classA(1,:) = randn(1,n) .* sigmaA + mA(1);
 classA(2,:) = randn(1,n) .* sigmaA + mA(2);
 classA(3,:)=ones(1,n);
@@ -17,6 +14,7 @@ patterns=tmp(:,randperm(2*n));
 w=randn(1,3);
 targets=(patterns(3,:));
 patterns=[patterns(1:2,:);ones(1,2*n)];
+
 
 %test data
 tclassA(1,:) = randn(1,n) .* sigmaA + mA(1);
@@ -32,7 +30,7 @@ ttargets=(tpatterns(3,:));
 tpatterns=[tpatterns(1:2,:);ones(1,2*n)];
 
 
-%% perceptron (3.1.2.1)
+%% perceptron (3.1.3.1)
 
 eta=0.003;
 epoch=100;
@@ -84,7 +82,7 @@ hold off
 
 
 
-%% delta bacth mode
+%% delta bacth mode (3.1.3.1)
 
 epochs = 100;
 eta=0.001;
@@ -129,7 +127,7 @@ line([-3,3],[y1 y2])
 hold off
 
 
-%% delta sequential (3.1.2.2)
+%% delta sequential (3.1.3.1)
 
 w=randn(1,3);
 
@@ -172,18 +170,14 @@ title('Boundary for delta sequential mode')
 line([-3,3],[y1 y2])
 hold off
 
-%% Ploting mean square error
-
+%% Ploting mean square error (3.1.3.1)
 
 figure(4)
 plot(e1)
 hold on
 plot(e2)
-
-%comment e3 for 3.1.2.1
 plot(e3)
 legend('Perceptron','Delta batch','Delta sequential')
 title('Mean square error at each batch')
-
 
 
