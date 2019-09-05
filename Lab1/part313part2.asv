@@ -56,7 +56,7 @@ end
 
 %test
 tydelta=sign(w*tpatterns);
-correctdelta1 = sum(tydelta==ttargets);
+correctdelta = sum(tydelta==ttargets);
 
 figure(2)
 plot(classA(1,:),classA(2,:),'r.')
@@ -109,7 +109,7 @@ end
 
 %test
 tydelta=sign(w*tpatterns);
-correctdelta25 = sum(tydelta==ttargets);
+correctdelta = sum(tydelta==ttargets);
 
 figure(3)
 plot(classA(1,removedA),classA(2,removedA),'r.')
@@ -160,7 +160,7 @@ end
 
 %test
 tydelta=sign(w*tpatterns);
-correctdelta50A = sum(tydelta==ttargets);
+correctdelta = sum(tydelta==ttargets);
 
 figure(4)
 plot(classA(1,removedA),classA(2,removedA),'r.')
@@ -212,7 +212,7 @@ end
 
 %test
 tydelta=sign(w*tpatterns);
-correctdelta50B = sum(tydelta==ttargets);
+correctdelta = sum(tydelta==ttargets);
 
 figure(5)
 plot(classA(1,:),classA(2,:),'r.')
@@ -249,7 +249,7 @@ removedA2=removedA2(len-0.2*len+1:end);
 
 tmpA1 = classA(:,classA(1,:)<0);
 tmpA2 = classA(:,classA(1,:)>0);
-tmp = [tmpA1(:,removedA1),tmpA2(:,removedA2),classB];
+tmp = [tmpA1(:,removedA1),tmpA2(:,removedA2),classB(:,removedB)];
 patterns=tmp(:,randperm(length(tmp)));
 w=randn(1,3);
 targets=(patterns(3,:));
@@ -272,15 +272,13 @@ end
 
 %test
 tydelta=sign(w*tpatterns);
-correctdeltamixedA = sum(tydelta==ttargets);
+correctdelta = sum(tydelta==ttargets);
 
 figure(6)
-plot([tmpA1(1,removedA1),tmpA2(1,removedA2)],[tmpA1(2,removedA1),tmpA2(2,removedA2)],'r.')
-
-
+plot(classA(1,:),classA(2,:),'r.')
 hold on
 
-plot(classB(1,:),classB(2,:),'b.')
+plot(classB(1,removedB),classB(2,removedB),'b.')
 w1= ([w(1),w(2)]./norm(w))*(-w(3))/norm(w);
 w2=[w1(2),-w1(1)]+w1;
 
