@@ -90,25 +90,23 @@ for part=0.2:0.1:0.8
     v=randn(1,Nhidden+1);
     dw=0;
     dv=0;
-    ndata = round(length(shupatterns)*part);
-    ndata
     
     %training, works well
     for i=1:epochs
         %forward pass
-
-        hin = w * [shupatterns(:,1:ndata) ; ones(1,ndata)];
+        ndata = round(length(shupatterns)*part);
+        hin = w * [shupatterns(:,1:) ; ones(1,ndata)];
         hout = [2 ./ (1+exp(-hin)) - 1 ; ones(1,ndata)];
         oin = v * hout;
         out = 2 ./ (1+exp(-oin)) - 1;
 
         %backward pass
-        delta_o = (out - shutargets(:,1:ndata)) .* ((1 + out) .* (1 - out)) * 0.5;
+        delta_o = (out - shutargets) .* ((1 + out) .* (1 - out)) * 0.5;
         delta_h = (v'* delta_o) .* ((1 + hout) .* (1 - hout)) * 0.5;
         delta_h = delta_h(1:Nhidden, :);
 
         %backpropagation
-        dw = (dw .* alpha) - (delta_h * [shupatterns(:,1:ndata) ; ones(1,ndata)]') .* (1-alpha);
+        dw = (dw .* alpha) - (delta_h * [shupatterns ; ones(1,ndata)]') .* (1-alpha);
         dv = (dv .* alpha) - (delta_o * hout') .* (1-alpha);
         w = w + dw .* eta;
         v = v + dv .* eta;
@@ -117,7 +115,6 @@ for part=0.2:0.1:0.8
     end
 
     %results
-    ndata=length(x)*length(y);
     hin = w * [patterns ; ones(1,ndata)];
     hout = [2 ./ (1+exp(-hin)) - 1 ; ones(1,ndata)];
     oin = v * hout;
@@ -127,13 +124,11 @@ for part=0.2:0.1:0.8
     error = sum((out-targets).^2)/ndata;
     
     zz = reshape(out, gridsize, gridsize);
-    figure(round(part*100))
+    figure(part*100)
     mesh(x,y,zz);
     axis([-5 5 -5 5 -0.7 0.7]);
     %sorry for all the plots
-    title(part*100 +"% data in training. Error=" + error)
+    title(part*100 +"% nodes in the hidden layer. Error=" + error)
 
 end
-%% 3.2.3.3 speeding up?
-
 
