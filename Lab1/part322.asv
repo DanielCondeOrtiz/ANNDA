@@ -22,7 +22,6 @@ eta=0.001;
 Nhidden=3;
 alpha = 0.9;
 
-%training, works well
 for i=1:epochs
     %forward pass
     hin = w * [patterns ; ones(1,ndata)];
@@ -36,18 +35,8 @@ for i=1:epochs
     delta_h = delta_h(1:Nhidden, :);
 
     %backpropagation
-    dw = (dw .* alpha) - (delta_h * [patterns ; ones(1,ndata)]') .* (1-alpha);
+    dw = (dw .* alpha) - (delta_h * [patterns ; ones(1,ndata)];') .* (1-alpha);
     dv = (dv .* alpha) - (delta_o * hout') .* (1-alpha);
     w = w + dw .* eta;
     v = v + dv .* eta;
 end
-
-
-%testing or whatever
-hin = w * [patterns ; ones(1,ndata)];
-hout = [2 ./ (1+exp(-hin)) - 1 ; ones(1,ndata)];
-oin = v * hout;
-out = 2 ./ (1+exp(-oin)) - 1;
-%should use acivator or something??
-
-

@@ -9,13 +9,15 @@ end
 input = [xvec(t-20); xvec(t-15); xvec(t-10); xvec(t-5); xvec(t)];
 output = xvec(t+5);
 
-train_in = input(:,1:700);
-train_out = output(1:700);
+train_in = input(:,1:1000);
+train_out = output(1:1000);
 
-val_in = input(:,701:1000);
-val_out = output(701:1000);
+% what is validation?
+% val_in = input(:,701:1000);
+% val_out = output(701:1000);
 
 test_in = input(:,1001:1200);
 test_out = output(1001:1200);
 
+%% training
 
