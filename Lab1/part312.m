@@ -228,7 +228,6 @@ end
 tydelta=sign(w*tpatterns(1:2,:));
 correctdelta = sum(tydelta==ttargets);
 
-close all
 figure(5)
 plot(classA(1,:),classA(2,:),'r.')
 hold on

@@ -1,7 +1,7 @@
 x=[-5:0.5:5]';
 y=[-5:0.5:5]';
 z=exp(-x.*x*0.1) * exp(-y.*y*0.1)' - 0.5;
-figure(30)
+figure(42)
 mesh(x, y, z);
 
 ndata=length(x)*length(y);
@@ -91,7 +91,6 @@ for part=0.2:0.1:0.8
     dw=0;
     dv=0;
     ndata = round(length(shupatterns)*part);
-    ndata
     
     %training, works well
     for i=1:epochs

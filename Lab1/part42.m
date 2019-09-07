@@ -1,3 +1,5 @@
+%NOT FINISHED!!!
+
 t = 301:1500;
 xvec=zeros(1,1506);
 
@@ -9,6 +11,8 @@ end
 input = [xvec(t-20); xvec(t-15); xvec(t-10); xvec(t-5); xvec(t)];
 output = xvec(t+5);
 
+%add noise
+
 train_in = input(:,1:1000);
 train_out = output(1:1000);
 
@@ -16,7 +20,7 @@ test_in = input(:,1001:1200);
 test_out = output(1001:1200);
 
 %% training
-
+%NOT FINISHED!!!
 
 % + info here
 % https://se.mathworks.com/matlabcentral/fileexchange/69762-multi-layer-perceptron
@@ -43,10 +47,8 @@ MLP.train(train_in,train_out,Options);
 % compare different models
 
 %% results
-
+%NOT FINISHED!!!
 MLP.propagate(test_in);
 results = MLP.Outputs;
 
 error = sum((results-test_out).^2)/200;
-
-
