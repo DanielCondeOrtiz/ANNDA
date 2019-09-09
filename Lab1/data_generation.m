@@ -18,8 +18,8 @@ function [patterns, targets] = data_generation(n, lin_sep, bias)
 if lin_sep
     sigmaA = 0.5;
     sigmaB = 0.5;
-    mA = [ 1.0, 0.5]; 
-    mB = [-1.0, 0.0];
+    mA = [ 1.1, 0.5]; 
+    mB = [-1.1, -0.5];
     classA(1,:) = randn(1,n) .* sigmaA + mA(1);
 else
     sigmaA = 0.2;

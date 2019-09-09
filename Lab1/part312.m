@@ -15,7 +15,7 @@ w=randn(1,3);
 
 %% perceptron (3.1.2.1)
 
-eta=0.003;
+eta=0.001;
 epoch=100;
 
 e1=[];
@@ -31,9 +31,10 @@ for j=1:epoch
 
     end
     
-    y=sign(w*patterns);
-    e=targets-y;
-    e1=[e1,sum(e.^2)];
+    %test
+    typerc=sign(w*tpatterns);
+    correctperc = sum(typerc==ttargets);
+    e1=[e1,correctperc/200];
     
 end
 
@@ -54,22 +55,23 @@ w=randn(1,3);
 
 e2=[];
 
-for i=0:epochs
+for i=1:epochs
 
     e=w*patterns-targets;
     
     deltaw=eta*e*patterns';
     w=w-deltaw;
     
-    
-    e2=[e2,sum(e.^2)/200];
+
+    %test
+    tydelta=sign(w*tpatterns);
+    correctdelta = sum(tydelta==ttargets);
+    e2=[e2,correctdelta/200];
     
 end
 
 
-%test
-tydelta=sign(w*tpatterns);
-correctdelta = sum(tydelta==ttargets);
+
 
 % plot the data
 plot_data_and_decision_boundary(patterns, targets, w, 'Boundary for delta batch mode', 2, bias)
@@ -80,7 +82,7 @@ w=randn(1,3);
 
 e3=[];
 
-for i=0:epochs
+for i=1:epochs
 
     for j=1:n*2
         e=w*patterns(:,j)-targets(:,j);
@@ -89,14 +91,13 @@ for i=0:epochs
         w=w-deltaw;
     end
     
-    e=w*patterns-targets;
-    e3=[e3,sum(e.^2)/200];
+    %test
+    tydelta=sign(w*tpatterns);
+    correctdelta = sum(tydelta==ttargets);
+    e3=[e3,correctdelta/200];
     
 end
 
-%test
-tydelta=sign(w*tpatterns);
-correctdelta = sum(tydelta==ttargets);
 
 
 % plot the data
@@ -112,8 +113,8 @@ plot(e2)
 
 %comment e3 for 3.1.2.1
 plot(e3)
-legend('Perceptron','Delta batch','Delta sequential')
-title('Mean square error at each batch')
+legend('Perceptron','Delta batch','Delta sequential','Location','southeast')
+title('Accuracy at each batch')
 
 
 
@@ -142,14 +143,7 @@ for i=0:epochs
     deltaw=eta*e*patterns';
     w=w-deltaw;
     
-    
-    e2=[e2,sum(e.^2)/200];
-    
 end
-
-%test
-tydelta=sign(w*tpatterns(1:2,:));
-correctdelta = sum(tydelta==ttargets);
 
 % plot the data
 plot_data_and_decision_boundary(patterns, targets, w, 'Boundary for delta batch mode without bias', 5, bias)
