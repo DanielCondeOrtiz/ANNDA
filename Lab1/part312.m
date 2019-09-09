@@ -13,6 +13,7 @@ bias = true;
 % initialize the weigths randomly
 w=randn(1,3);
 
+
 %% perceptron (3.1.2.1)
 
 eta=0.001;

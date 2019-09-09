@@ -1,7 +1,7 @@
 %training data
 n = 100;
-mA = [ 1.35, 0.35]; sigmaA = 0.52;
-mB = [0.45, -0.35]; sigmaB = 0.52;
+mA = [ -0.40, 0.30]; sigmaA = 0.52;
+mB = [0.40, -0.30]; sigmaB = 0.52;
 classA(1,:) = randn(1,n) .* sigmaA + mA(1);
 classA(2,:) = randn(1,n) .* sigmaA + mA(2);
 classA(3,:)=ones(1,n);
@@ -32,7 +32,7 @@ tpatterns=[tpatterns(1:2,:);ones(1,2*n)];
 
 %% perceptron (3.1.3.1)
 
-eta=0.003;
+eta=0.001;
 epoch=100;
 
 e1=[];
@@ -48,16 +48,12 @@ for j=1:epoch
 
     end
     
-    y=sign(w*patterns);
-    e=targets-y;
-    e1=[e1,sum(e.^2)];
+    %test
+    typerc=sign(w*tpatterns);
+    correctperc = sum(typerc==ttargets);
+    e1=[e1,correctperc/200];
     
 end
-
-
-%test
-typerc=sign(w*tpatterns);
-correctperc = sum(typerc==ttargets);
 
 figure(1)
 plot(classA(1,:),classA(2,:),'r.')
@@ -98,7 +94,10 @@ for i=0:epochs
     w=w-deltaw;
     
     
-    e2=[e2,sum(e.^2)/200];
+    %test
+    tydelta=sign(w*tpatterns);
+    correctdelta = sum(tydelta==ttargets);
+    e2=[e2,correctdelta/200];
     
 end
 
@@ -133,7 +132,7 @@ w=randn(1,3);
 
 e3=[];
 
-for i=0:epochs
+for i=1:epochs
 
     for j=1:n*2
         e=w*patterns(:,j)-targets(:,j);
@@ -142,14 +141,12 @@ for i=0:epochs
         w=w-deltaw;
     end
     
-    e=w*patterns-targets;
-    e3=[e3,sum(e.^2)/200];
+    %test
+    tydelta=sign(w*tpatterns);
+    correctdelta = sum(tydelta==ttargets);
+    e3=[e3,correctdelta/200];
     
 end
-
-%test
-tydelta=sign(w*tpatterns);
-correctdelta = sum(tydelta==ttargets);
 
 figure(3)
 plot(classA(1,:),classA(2,:),'r.')
@@ -158,6 +155,7 @@ hold on
 plot(classB(1,:),classB(2,:),'b.')
 w1= ([w(1),w(2)]./norm(w))*(-w(3))/norm(w);
 w2=[w1(2),-w1(1)]+w1;
+
 
 xlim([-3 3])
 ylim([-3 3])
@@ -176,8 +174,13 @@ figure(4)
 plot(e1)
 hold on
 plot(e2)
+
+%comment e3 for 3.1.2.1
 plot(e3)
-legend('Perceptron','Delta batch','Delta sequential')
-title('Mean square error at each batch')
+legend('Perceptron','Delta batch','Delta sequential','Location','southeast')
+title('Accuracy at each batch')
+
+
+
 
 
