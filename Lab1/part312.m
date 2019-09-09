@@ -1,36 +1,17 @@
 
 %% 3.1.2
 
-%training data
+% training data
 n = 100;
-mA = [ 1.8, 0.8]; sigmaA = 0.5;
-mB = [-1.8, -0.8]; sigmaB = 0.5;
-classA(1,:) = randn(1,n) .* sigmaA + mA(1);
-classA(2,:) = randn(1,n) .* sigmaA + mA(2);
-classA(3,:)=ones(1,n);
-classB(1,:) = randn(1,n) .* sigmaB + mB(1);
-classB(2,:) = randn(1,n) .* sigmaB + mB(2);
-classB(3,:)=-ones(1,n);
+lin_sep = true;
+bias = true;
+[patterns, targets] = data_generation(n, lin_sep, bias);
 
-tmp = [classA,classB];
-patterns=tmp(:,randperm(2*n));
+% test data
+[tpatterns, ttargets] = data_generation(n, lin_sep, bias);
+
+% initialize the weigths randomly
 w=randn(1,3);
-targets=(patterns(3,:));
-patterns=[patterns(1:2,:);ones(1,2*n)];
-
-%test data
-tclassA(1,:) = randn(1,n) .* sigmaA + mA(1);
-tclassA(2,:) = randn(1,n) .* sigmaA + mA(2);
-tclassA(3,:)=ones(1,n);
-tclassB(1,:) = randn(1,n) .* sigmaB + mB(1);
-tclassB(2,:) = randn(1,n) .* sigmaB + mB(2);
-tclassB(3,:)=-ones(1,n);
-
-tmp = [tclassA,tclassB];
-tpatterns=tmp(:,randperm(2*n));
-ttargets=(tpatterns(3,:));
-tpatterns=[tpatterns(1:2,:);ones(1,2*n)];
-
 
 %% perceptron (3.1.2.1)
 
@@ -61,27 +42,8 @@ end
 typerc=sign(w*tpatterns);
 correctperc = sum(typerc==ttargets);
 
-figure(1)
-plot(classA(1,:),classA(2,:),'r.')
-hold on
-
-plot(classB(1,:),classB(2,:),'b.')
-
-w1= ([w(1),w(2)]./norm(w))*(-w(3))/norm(w);
-w2=[w1(2),-w1(1)]+w1;
-
-
-xlim([-3 3])
-ylim([-3 3])
-
-m = (w2(2)-w2(1))/(w1(2)-w1(1));
-n1 = w2(2)*m - w1(2);
-y1 = m*-3 + n1;
-y2 = m*3 + n1;
-line([-3,3],[y1 y2])
-title('Boundary for perceptron')
-hold off
-
+% plot the data
+plot_data_and_decision_boundary(patterns, targets, w, 'Boundary for perceptron', 1, bias)
 
 
 %% delta bacth mode (3.1.2.1)
@@ -109,25 +71,8 @@ end
 tydelta=sign(w*tpatterns);
 correctdelta = sum(tydelta==ttargets);
 
-figure(2)
-plot(classA(1,:),classA(2,:),'r.')
-hold on
-
-plot(classB(1,:),classB(2,:),'b.')
-w1= ([w(1),w(2)]./norm(w))*(-w(3))/norm(w);
-w2=[w1(2),-w1(1)]+w1;
-
-xlim([-3 3])
-ylim([-3 3])
-
-m = (w2(2)-w2(1))/(w1(2)-w1(1));
-n1 = w2(2)*m - w1(2);
-y1 = m*-3 + n1;
-y2 = m*3 + n1;
-title('Boundary for delta batch mode')
-line([-3,3],[y1 y2])
-hold off
-
+% plot the data
+plot_data_and_decision_boundary(patterns, targets, w, 'Boundary for delta batch mode', 2, bias)
 
 %% delta sequential (3.1.2.2)
 
@@ -153,24 +98,9 @@ end
 tydelta=sign(w*tpatterns);
 correctdelta = sum(tydelta==ttargets);
 
-figure(3)
-plot(classA(1,:),classA(2,:),'r.')
-hold on
 
-plot(classB(1,:),classB(2,:),'b.')
-w1= ([w(1),w(2)]./norm(w))*(-w(3))/norm(w);
-w2=[w1(2),-w1(1)]+w1;
-
-xlim([-3 3])
-ylim([-3 3])
-
-m = (w2(2)-w2(1))/(w1(2)-w1(1));
-n1 = w2(2)*m - w1(2);
-y1 = m*-3 + n1;
-y2 = m*3 + n1;
-title('Boundary for delta sequential mode')
-line([-3,3],[y1 y2])
-hold off
+% plot the data
+plot_data_and_decision_boundary(patterns, targets, w, 'Boundary for delta sequential mode', 3, bias)
 
 %% Ploting mean square error (3.1.2.1 & 3.1.2.2)
 
@@ -189,22 +119,15 @@ title('Mean square error at each batch')
 
 %% 3.1.2.3
 
-
-%training data
 n = 100;
-mA = [ 1.8, -0.8]; sigmaA = 0.5;
-mB = [-1, 0.5]; sigmaB = 0.5;
-classA(1,:) = randn(1,n) .* sigmaA + mA(1);
-classA(2,:) = randn(1,n) .* sigmaA + mA(2);
-classA(3,:)=ones(1,n);
-classB(1,:) = randn(1,n) .* sigmaB + mB(1);
-classB(2,:) = randn(1,n) .* sigmaB + mB(2);
-classB(3,:)=-ones(1,n);
+lin_sep = true;
+bias = false;
 
-tmp = [classA,classB];
-patterns=tmp(:,randperm(2*n));
-targets=(patterns(2,:));
-patterns=[patterns(1:2,:)];
+% training data
+[patterns, targets] = data_generation(n, lin_sep, bias);
+
+% test data
+[tpatterns, ttargets] = data_generation(n, lin_sep, bias);
 
 epochs = 100;
 eta=0.001;
@@ -228,20 +151,6 @@ end
 tydelta=sign(w*tpatterns(1:2,:));
 correctdelta = sum(tydelta==ttargets);
 
-figure(5)
-plot(classA(1,:),classA(2,:),'r.')
-hold on
-
-plot(classB(1,:),classB(2,:),'b.')
-w1=[-w(2), w(1)];
-w2=-w1;
-
-xlim([-3 3])
-ylim([-3 3])
-
-title('Boundary for delta batch mode without bias')
-plot([0,w(1)],[0,w(2)])
-plot([w1(1),w2(1)],[w1(2),w2(2)])
-
-hold off
+% plot the data
+plot_data_and_decision_boundary(patterns, targets, w, 'Boundary for delta batch mode without bias', 5, bias)
 
