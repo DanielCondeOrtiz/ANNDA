@@ -9,6 +9,8 @@ end
 input = [xvec(t-20); xvec(t-15); xvec(t-10); xvec(t-5); xvec(t)];
 output = xvec(t+5);
 
+
+
 train_in = input(:,1:1000);
 train_out = output(1:1000);
 
@@ -46,6 +48,15 @@ MLP.train(train_in,train_out,Options);
 
 MLP.propagate(test_in);
 results = MLP.Outputs;
+
+
+figure(200)
+plot(test_out) %???
+hold on
+plot(results)
+title('Real and Test output')
+legend('Real output','Test output')
+hold off
 
 error = sum((results-test_out).^2)/200;
 
