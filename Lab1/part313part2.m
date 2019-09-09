@@ -182,4 +182,4 @@ tydelta=sign(w*tpatterns);
 correctdeltamixedA = sum(tydelta==ttargets);
 
 % plot the data
-plot_data_and_decision_boundary(patterns, targets, w, 'Boundary for 50% removed of B', 5, bias)
+plot_data_and_decision_boundary(patterns, targets, w, 'Boundary for removing from A with conditions', 5, bias)

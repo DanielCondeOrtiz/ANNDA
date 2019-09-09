@@ -39,8 +39,8 @@ ylim([-3 3])
 
 title(plot_title)
 hold off
-legend_text = num2str(class_identifiers(:));
-legend(legend_text)
+% legend_text = num2str(class_identifiers(:));
+legend('B', 'A')
 
 end
 
