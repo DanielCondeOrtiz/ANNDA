@@ -11,19 +11,25 @@ patterns=[1,-1,-1,-1,-1,-1,-1,-1;...
 %T
 targets=patterns;
 
-w=randn(3,9);
-v=randn(8,4);
+Nhidden=3;
+
+w=randn(Nhidden,9);
+v=randn(8,Nhidden+1);
 dw=0;
 dv=0;
 
 ndata=8;
-epochs = 100;
+epochs = 1000000;
 eta=0.001;
-Nhidden=3;
+
 alpha = 0.9;
 
 %training, works well
-for i=1:epochs
+converged = 0;
+i = 0;
+while converged == 0
+% for i=1:epochs
+i = i+1;
     %forward pass
     hin = w * [patterns ; ones(1,ndata)];
     hout = [2 ./ (1+exp(-hin)) - 1 ; ones(1,ndata)];
@@ -40,6 +46,16 @@ for i=1:epochs
     dv = (dv .* alpha) - (delta_o * hout') .* (1-alpha);
     w = w + dw .* eta;
     v = v + dv .* eta;
+
+    hin = w * [patterns ; ones(1,ndata)];
+    hout = [2 ./ (1+exp(-hin)) - 1 ; ones(1,ndata)];
+    oin = v * hout;
+    out = 2 ./ (1+exp(-oin)) - 1;
+    
+    
+    if sum(sum(sign(out) == patterns)) == 64
+        converged = 1;
+    end
 end
 
 

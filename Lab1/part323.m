@@ -1,3 +1,6 @@
+clear all
+close all
+
 x=[-5:0.5:5]';
 y=[-5:0.5:5]';
 z=exp(-x.*x*0.1) * exp(-y.*y*0.1)' - 0.5;
@@ -19,6 +22,8 @@ gridsize=length(x);
  order = randperm(ndata);
 shupatterns = patterns(:,order);
 shutargets =  targets(order);
+
+error = zeros(25,1);
 
 %training
 for nodes=1:25
@@ -57,18 +62,18 @@ for nodes=1:25
     oin = v * hout;
     out = 2 ./ (1+exp(-oin)) - 1;
     
-    error = sum((out-targets).^2)/ndata;
+    error(nodes) = sum((out-targets).^2)/ndata;
     
     zz = reshape(out, gridsize, gridsize);
     figure(nodes)
     mesh(x,y,zz);
     axis([-5 5 -5 5 -0.7 0.7]);
     %sorry for all the plots
-    title(nodes +" nodes in the hidden layer. Error=" + error)
+    title(nodes +" nodes in the hidden layer. Error=" + error(nodes))
 
 end
 
-
+[min_error_layer, min_error_index_layer] = min(error);
 
 %% 3.2.3.2, now we select best model, CHANGE NHIDDEN
 
@@ -82,10 +87,13 @@ order = randperm(ndata);
 shupatterns = patterns(:,order);
 shutargets =  targets(order);
 
+error = zeros(7,1);
+index = 0;
 %training
 for part=0.2:0.1:0.8
+    index = index+1;
 
-    Nhidden=20;
+    Nhidden=min_error_index_layer;
     w=randn(Nhidden,3);
     v=randn(1,Nhidden+1);
     dw=0;
@@ -123,16 +131,22 @@ for part=0.2:0.1:0.8
     out = 2 ./ (1+exp(-oin)) - 1;
     
     %I don't know if the error is OK, probably??
-    error = sum((out-targets).^2)/ndata;
+    error(index) = sum((out-targets).^2)/ndata;
     
     zz = reshape(out, gridsize, gridsize);
     figure(round(part*100))
     mesh(x,y,zz);
     axis([-5 5 -5 5 -0.7 0.7]);
     %sorry for all the plots
-    title(part*100 +"% data in training. Error=" + error)
+    title(part*100 +"% data in training. Error=" + error(index))
 
 end
+
+[~,min_error_train_percent_index] = min(error);
+training_percentage = 0.2:0.1:08;
+
+min_error_training_percentage = training_percentage(min_error_train_percent_index);
+
 %% 3.2.3.3 speeding up?
 
 
