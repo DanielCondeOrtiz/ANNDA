@@ -27,7 +27,7 @@ test_out = output(1001:1200);
 MLP = ...
     MultiLayerPerceptron('LengthsOfLayers', [5 3 1],... %change numbers
                          'HiddenActFcn',    'linear',...
-                         'OutputActFcn',    'linear');           
+                         'OutputActFcn',    'linear');
 
 % Training options
 Options = ...
@@ -36,10 +36,10 @@ Options = ...
            'MinimumMSE',                1e-2,...
            'SizeOfBatches',             30,...
            'SplitRatio',                0.7,...
-           'Momentum',                  0.9);                    
-       
-% Training       
-MLP.train(train_in,train_out,Options);    
+           'Momentum',                  0.9);
+
+% Training
+MLP.train(train_in,train_out,Options);
 
 % we have to put early stopping and whatever regularisation means
 % compare different models
@@ -59,5 +59,3 @@ legend('Real output','Test output')
 hold off
 
 error = sum((results-test_out).^2)/200;
-
-
