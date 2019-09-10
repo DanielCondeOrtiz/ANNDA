@@ -2,7 +2,7 @@ def xfunc(t,xvec):
     if t==0:
         return 1.5
     else:
-        x1=xvec[t]
+        x1=xvec[t-1]
 
         if (t-26) <0:
             x25 = 0

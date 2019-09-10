@@ -1,13 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from xfunc import xfunc
-from mpl_toolkits.mplot3d import Axes3D
 
-from sklearn.inspection import partial_dependence
-from sklearn.inspection import plot_partial_dependence
-from sklearn.ensemble import GradientBoostingRegressor
+
 from sklearn.neural_network import MLPRegressor
-from sklearn.datasets.california_housing import fetch_california_housing
 
 
 def main():
@@ -30,88 +26,83 @@ def main():
         output[0,tt-300] = xvec[0,tt+5]
 
 
-    train_in = input[:,range(0,999)]
-    train_out = output[range(0,999)]
+    train_in = input[::,range(0,999)].transpose()
+    train_out = output[0,range(0,999)]
 
-    test_in = input[:,range(1000,1199)]
-    test_out = output[range(1000,1199)]
+    test_in = input[::,range(1000,1199)].transpose()
+    test_out = output[0,range(1000,1199)]
 
+
+    results = np.zeros((4,8))
+    # results2 = np.zeros((4,8))
     #training
+    for alph in range(2,6):
+        weights = []
+        for nodes in range(2,10):
+            est = MLPRegressor(hidden_layer_sizes=(nodes,),
+                                               activation='logistic',
+                                               solver='adam',
+                                               learning_rate='adaptive',
+                                               max_iter=10000,
+                                               learning_rate_init=0.01,
+                                               alpha=1/(10**alph),
+                                               early_stopping=True)
+            est.fit(train_in, train_out)
+            weights = np.concatenate((weights,est.coefs_[0].flatten(),est.coefs_[0].flatten()))
+
+    #
+            pred = est.predict(test_in)
+            results[alph-2,nodes-2] = sum((pred-test_out)**2)/200
+    #
+    #         pred2 = est.predict(train_in)
+    #         results2[alph-2,nodes-2] = sum((pred2-train_out)**2)/1000
+    #
+
+        plt.figure(alph-1)
+        plt.hist(weights,25)
 
 
+        plt.xlabel('Weight value')
+        plt.title('Histogram of weights for alpha=' + str(1/(10**alph)))
+        plt.ylim([0,105])
+        plt.xlim([-6,6])
+
+    plt.figure(11)
+
+    for alph in range(2,6):
+
+        plt.plot(range(2,10),results[alph-2],label='alpha=' + str(1/(10**alph)))
+
+        plt.legend(loc='upper right')
+        plt.title('Error by number of nodes and regularisation')
 
     #
     #
+    # plt.figure(2)
+    # for alph in range(2,6):
+    #     plt.plot(range(2,10),results2[alph-2],label='alpha=' + str(1/(10**alph)))
+    #     plt.legend(loc='upper right')
+    #     plt.title('Error by number of nodes and regularisation')
     #
     #
     #
     #
-    #
-    #
-    #
-    #
-    #
-    #
-    # cal_housing = fetch_california_housing()
-    #
-    # X, y = cal_housing.data, cal_housing.target
-    # names = cal_housing.feature_names
-    #
-    # # Center target to avoid gradient boosting init bias: gradient boosting
-    # # with the 'recursion' method does not account for the initial estimator
-    # # (here the average target, by default)
-    # y -= y.mean()
-    #
-    # print("Training MLPRegressor...")
-    # est = MLPRegressor(activation='logistic')
-    # est.fit(X, y)
-    # print('Computing partial dependence plots...')
-    # # We don't compute the 2-way PDP (5, 1) here, because it is a lot slower
-    # # with the brute method.
-    # features = [0, 5, 1, 2]
-    # plot_partial_dependence(est, X, features, feature_names=names,
-    #                         n_jobs=3, grid_resolution=50)
-    # fig = plt.gcf()
-    # fig.suptitle('Partial dependence of house value on non-location features\n'
-    #              'for the California housing dataset, with MLPRegressor')
-    # plt.subplots_adjust(top=0.9)  # tight_layout causes overlap with suptitle
-    #
-    # print("Training GradientBoostingRegressor...")
-    # est = GradientBoostingRegressor(n_estimators=100, max_depth=4,
-    #                                 learning_rate=0.1, loss='huber',
-    #                                 random_state=1)
-    # est.fit(X, y)
-    # print('Computing partial dependence plots...')
-    # features = [0, 5, 1, 2, (5, 1)]
-    # plot_partial_dependence(est, X, features, feature_names=names,
-    #                         n_jobs=3, grid_resolution=50)
-    # fig = plt.gcf()
-    # fig.suptitle('Partial dependence of house value on non-location features\n'
-    #              'for the California housing dataset, with Gradient Boosting')
-    # plt.subplots_adjust(top=0.9)
-    #
-    # print('Custom 3d plot via ``partial_dependence``')
-    # fig = plt.figure()
-    #
-    # target_feature = (1, 5)
-    # pdp, axes = partial_dependence(est, X, target_feature,
-    #                                grid_resolution=50)
-    # XX, YY = np.meshgrid(axes[0], axes[1])
-    # Z = pdp[0].T
-    # ax = Axes3D(fig)
-    # surf = ax.plot_surface(XX, YY, Z, rstride=1, cstride=1,
-    #                        cmap=plt.cm.BuPu, edgecolor='k')
-    # ax.set_xlabel(names[target_feature[0]])
-    # ax.set_ylabel(names[target_feature[1]])
-    # ax.set_zlabel('Partial dependence')
-    # #  pretty init view
-    # ax.view_init(elev=22, azim=122)
-    # plt.colorbar(surf)
-    # plt.suptitle('Partial dependence of house value on median\n'
-    #              'age and average occupancy, with Gradient Boosting')
-    # plt.subplots_adjust(top=0.9)
-    #
-    # plt.show()
+    est = MLPRegressor(hidden_layer_sizes=(6,),
+                                       activation='logistic',
+                                       solver='adam',
+                                       learning_rate='adaptive',
+                                       max_iter=10000,
+                                       learning_rate_init=0.01,
+                                       alpha=0.0001,
+                                       early_stopping=True)
+    est.fit(train_in, train_out)
+    pred = est.predict(test_in)
+    plt.figure(10)
+    plt.plot(pred)
+    plt.plot(test_out)
+
+
+    plt.show()
 
 if __name__ == '__main__':
     main()
