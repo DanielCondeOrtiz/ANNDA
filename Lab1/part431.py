@@ -48,7 +48,7 @@ def main():
                                                alpha=1/(10**alph),
                                                early_stopping=True)
             est.fit(train_in, train_out)
-            weights = np.concatenate((weights,est.coefs_[0].flatten(),est.coefs_[0].flatten()))
+            weights = np.concatenate((weights,est.coefs_[0].flatten(),est.coefs_[1].flatten()))
 
     #
             pred = est.predict(test_in)
@@ -64,10 +64,11 @@ def main():
 
         plt.xlabel('Weight value')
         plt.title('Histogram of weights for alpha=' + str(1/(10**alph)))
-        plt.ylim([0,105])
+        plt.ylim([0,55])
         plt.xlim([-6,6])
 
     plt.figure(11)
+    plt.ylim([0,0.02])
 
     for alph in range(2,6):
 
@@ -98,8 +99,9 @@ def main():
     est.fit(train_in, train_out)
     pred = est.predict(test_in)
     plt.figure(10)
-    plt.plot(pred)
-    plt.plot(test_out)
+    plt.plot(pred,label='Prediction')
+    plt.plot(test_out,label='Real output')
+    plt.legend(loc='upper left')
 
 
     plt.show()

@@ -97,7 +97,7 @@ def main():
         test_out = test_out + np.random.normal(0,noise,199)
 
         for alph in range(2,6):
-            est = MLPRegressor(hidden_layer_sizes=(6,3,), #3???
+            est = MLPRegressor(hidden_layer_sizes=(6,6,), #???
                                                activation='logistic',
                                                solver='adam',
                                                learning_rate='adaptive',
@@ -159,7 +159,7 @@ def main():
 
 
     start = time.time()
-    est2 = MLPRegressor(hidden_layer_sizes=(6,7,), #???
+    est2 = MLPRegressor(hidden_layer_sizes=(6,6,), #???
                                        activation='logistic',
                                        solver='adam',
                                        learning_rate='adaptive',
