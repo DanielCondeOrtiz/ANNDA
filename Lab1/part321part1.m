@@ -1,4 +1,7 @@
 %% 3.2.2
+close all
+clear all
+
 n = 100;
 lin_sep = false;
 bias = true;
@@ -22,6 +25,7 @@ error=zeros(5,Nhidden-1);
 misclas=zeros(5,Nhidden-1);
 
 for nodes=2:Nhidden
+    nodes
     w=randn(nodes,3); %N1, N0
     v=randn(1,nodes+1); %N2, N1
     dw=0;
@@ -31,6 +35,16 @@ for nodes=2:Nhidden
     tmpmisclas=zeros(1,5);
     j=1;
     %training, works well
+%     converged = 0;
+%     overrun = 0;
+%     epoch = 0;
+%     while converged == 0 && overrun == 0
+%         epoch = epoch+1;
+%         if epoch > 50000
+%             overrun = 1;
+%             epochs(nodes-1) = epoch;
+%             result{nodes-1} = 'overrun';
+%         end
     for i=1:epochs
         %forward pass
         hin = w * patterns;
@@ -60,7 +74,23 @@ for nodes=2:Nhidden
             tmpmisclas(j) = sum(sign(out)==targets)/200;
             j=j+1;
         end
+    
+%     hin = w * patterns;
+%     hout = [2 ./ (1+exp(-hin)) - 1 ; ones(1,ndata)];
+%     oin = v * hout;
+%     out = 2 ./ (1+exp(-oin)) - 1;
+    
+%     if sum(targets==sign(out)) >= 199
+%         converged =1;
+%         epochs(nodes-1) = epoch;
+%         result{nodes-1} = 'converged';
+%     end
+
+    
     end
+    
+    
+    
     error(:,nodes-1)=tmperror;
     misclas(:,nodes-1)=tmpmisclas;
     
