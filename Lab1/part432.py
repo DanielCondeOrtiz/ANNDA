@@ -155,8 +155,6 @@ def main():
 
     time1 = time.time() - start
 
-    plt.figure(13)
-    plt.plot(pred1,label='2 layers')
     #plt.plot(test_out)
 
 
@@ -176,7 +174,9 @@ def main():
     pred2 = est2.predict(test_in)
     time2 = time.time() - start
 
+    plt.figure(13)
     plt.plot(pred2, label='3 layers')
+    plt.plot(pred1,label='2 layers')
     plt.legend(loc='lower right')
 
     print('Times for each number of nodes:')
