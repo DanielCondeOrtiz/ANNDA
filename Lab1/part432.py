@@ -45,7 +45,6 @@ def main():
         test_out = test_out + np.random.normal(0,noise,199)
 
         for nodes in range(2,10):
-            start = time.time()
 
             est = MLPRegressor(hidden_layer_sizes=(6,nodes,),
                                                activation='logistic',
@@ -57,12 +56,13 @@ def main():
                                                early_stopping=True)
 
 
+            start = time.time()
             est.fit(train_in, train_out)
+            timresults[0,nodes-2] = timresults[0,nodes-2] + time.time() - start
 
             pred = est.predict(test_in)
             results[i,nodes-2] = sum((pred-test_out)**2)/200
 
-            timresults[0,nodes-2] = timresults[0,nodes-2] + time.time() - start
 
         i=i+1
 
@@ -141,7 +141,6 @@ def main():
     test_in = test_in + np.random.normal(0,0.09,(199,5))
     test_out = test_out + np.random.normal(0,0.09,199)
 
-    start = time.time()
     est1 = MLPRegressor(hidden_layer_sizes=(6,),
                                        activation='logistic',
                                        solver='adam',
@@ -150,15 +149,16 @@ def main():
                                        learning_rate_init=0.01,
                                        alpha=0.0001,
                                        early_stopping=True)
+    start = time.time()
     est1.fit(train_in, train_out)
+    time1 = time.time() - start
+
     pred1 = est1.predict(test_in)
 
-    time1 = time.time() - start
 
     #plt.plot(test_out)
 
 
-    start = time.time()
     est2 = MLPRegressor(hidden_layer_sizes=(6,6,), #???
                                        activation='logistic',
                                        solver='adam',
@@ -169,10 +169,11 @@ def main():
                                        early_stopping=True)
 
 
+    start = time.time()
     est2.fit(train_in, train_out)
+    time2 = time.time() - start
 
     pred2 = est2.predict(test_in)
-    time2 = time.time() - start
 
     plt.figure(13)
     plt.plot(pred2, label='3 layers')
