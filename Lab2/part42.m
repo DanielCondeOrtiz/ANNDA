@@ -75,4 +75,5 @@ citiessorted = cities(index,:);
 plot(cities(:,1),cities(:,2),'*r')
 hold on
 plot(citiessorted(:,1),citiessorted(:,2))
+title('Shortest path between cities')
 hold off
