@@ -21,22 +21,22 @@ error0001 = true;
 
 while exit == true
     mu = 0:((2*pi)/(nodes-1)):2*pi;
-    var = 0.01;
-
+    var = 0.1;
+    
     phi=[];
     for i=1:nodes
         phi=[phi; phi_i(x,mu(i),var)];
     end
-
+    
     phi = phi';
-
+    
     A = phi' * phi;
     B = phi' * fun1';
-
+    
     w = linsolve(A,B);
-
+    
     fout1 = zeros(1,length(xtest));
-
+    
     for j=1:length(xtest)
         tmp = 0;
         for i=1:nodes
@@ -44,11 +44,11 @@ while exit == true
         end
         fout1(j) = tmp;
     end
-
+    
     error = mean(abs(fout1-fun1test));
     
     if error < 0.1 && error01 == true
-        figure(1)
+        subplot(2,3,1)
         plot(xtest,fout1)
         hold on
         plot(xtest,fun1test)
@@ -58,7 +58,7 @@ while exit == true
     end
     
     if error < 0.01 && error001 == true
-        figure(2)
+        subplot(2,3,2)
         plot(xtest,fout1)
         hold on
         plot(xtest,fun1test)
@@ -68,7 +68,7 @@ while exit == true
     end
     
     if error < 0.001 && error0001 == true
-        figure(3)
+        subplot(2,3,3)
         plot(xtest,fout1)
         hold on
         plot(xtest,fun1test)
@@ -96,33 +96,33 @@ minerrornodes = 0;
 while exit == true
     mu = 0:((2*pi)/(nodes-1)):2*pi;
     var = 0.01;
-
+    
     phi=[];
     for i=1:nodes
         phi=[phi; phi_i(x,mu(i),var)];
     end
-
+    
     phi = phi';
-
+    
     A = phi' * phi;
     B = phi' * fun2';
-
+    
     w = linsolve(A,B);
-
+    
     fout2 = zeros(1,length(xtest));
-
+    
     for j=1:length(xtest)
         tmp = 0;
         for i=1:nodes
             tmp = tmp + w(i)*phi_i(xtest(j),mu(i),var);
         end
         fout2(j) = tmp;
-    end  
+    end
     
     error = mean(abs(fout2-fun2test));
     
     if error < 0.1 && error01 == true
-        figure(4)
+        subplot(2,3,4)
         plot(xtest,fout2)
         hold on
         plot(xtest,fun2test)
@@ -158,7 +158,6 @@ while exit == true
         minerrornodes = nodes;
     end
     
-    display(error)
     if nodes > 100
         exit = false;
     end
@@ -177,33 +176,33 @@ error0001 = true;
 while exit == true
     mu = 0:((2*pi)/(nodes-1)):2*pi;
     var = 0.01;
-
+    
     phi=[];
     for i=1:nodes
         phi=[phi; phi_i(x,mu(i),var)];
     end
-
+    
     phi = phi';
-
+    
     A = phi' * phi;
     B = phi' * fun2';
-
+    
     w = linsolve(A,B);
-
+    
     fout2 = zeros(1,length(xtest));
-
+    
     for j=1:length(xtest)
         tmp = 0;
         for i=1:nodes
             tmp = tmp + w(i)*phi_i(xtest(j),mu(i),var);
         end
         fout2(j) = sign(tmp);
-    end  
+    end
     
     error = mean(abs(fout2-fun2test));
     
     if error < 0.1 && error01 == true
-        figure(7)
+        subplot(2,3,5)
         plot(xtest,fout2)
         hold on
         plot(xtest,fun2test)
@@ -214,18 +213,18 @@ while exit == true
     end
     
     if error < 0.01 && error001 == true
-        figure(8)
-        plot(xtest,fout2)
-        hold on
-        plot(xtest,fun2test)
-        title("Error < 0.01 with " + nodes + " nodes and sign()")
-        ylim([-1.2,1.2])
-        hold off
-        error001 = false;
+%         figure(8)
+%         plot(xtest,fout2)
+%         hold on
+%         plot(xtest,fun2test)
+%         title("Error < 0.01 with " + nodes + " nodes and sign()")
+%         ylim([-1.2,1.2])
+%         hold off
+%         error001 = false;
     end
     
     if error < 0.001 && error0001 == true
-        figure(9)
+        subplot(2,3,6)
         plot(xtest,fout2)
         hold on
         plot(xtest,fun2test)

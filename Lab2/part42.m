@@ -74,6 +74,7 @@ citiessorted = cities(index,:);
 
 plot(cities(:,1),cities(:,2),'*r')
 hold on
-plot(citiessorted(:,1),citiessorted(:,2))
+plot(citiessorted(:,1),citiessorted(:,2),'b')
+plot([citiessorted(1,1),citiessorted(end,1)],[citiessorted(1,2),citiessorted(end,2)],'b--')
 title('Shortest path between cities')
 hold off
