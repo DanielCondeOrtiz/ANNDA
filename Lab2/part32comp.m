@@ -2,17 +2,17 @@ close all
 clear all
 
 %% data
-x = 0:0.1:2*pi;
-x = x + 0.1*randn(1,length(x));
+xtrue = 0:0.1:2*pi;
+x = xtrue + 0.1*randn(1,length(xtrue));
 
-fun1= sin(2*x);
-fun2 = sign(fun1);
+fun1= sin(2*xtrue)+ 0.1*randn(1,length(xtrue));
+fun2 = sign(sin(2*xtrue))+ 0.1*randn(1,length(xtrue));
 
-xtest = 0.05:0.1:2*pi;
-xtest = xtest + 0.1*randn(1,length(xtest));
+xtesttrue = 0.05:0.1:2*pi;
+xtest = xtesttrue + 0.1*randn(1,length(xtesttrue));
 
-fun1test = sin(2*xtest);
-fun2test = sign(sin(2*xtest));
+fun1test = sin(2*xtesttrue) + 0.1*randn(1,length(xtesttrue));
+fun2test = sign(sin(2*xtesttrue)) + 0.1*randn(1,length(xtesttrue));
 
 phi_i = @(x,mu,sigma) exp((-(x-mu).^2)/(2*sigma));
 
@@ -21,8 +21,6 @@ width = 0.1; %????
 
 
 %% training sin
-%delta rule
-
 %batch
 
 errors = [];
@@ -52,10 +50,12 @@ for j=1:length(xtest)
 end
 
 figure(1)
-plot(xtest,fout1)
+plot(xtest,fout1,'r*')
 hold on
-plot(xtest,fun1test)
+plot(xtesttrue,sin(2*xtesttrue))
 title("Batch. Sine wave")
+ylim([-1.2 1.2])
+xlim([0, 2*pi])
 hold off
 
 
@@ -90,10 +90,12 @@ end
 
 
 figure(2)
-plot(xtest,fout2)
+plot(xtest,fout2,'r*')
 hold on
-plot(xtest,fun2test)
+plot(xtesttrue,sign(sin(2*xtesttrue)))
 title("Batch. Square wave")
+ylim([-1.2 1.2])
+xlim([0, 2*pi])
 hold off
 
 
@@ -101,7 +103,7 @@ hold off
 %% two layers perceptron sine
 
 ndata=length(x);
-epochs = 200;
+epochs = 2000;
 eta=0.001;
 Nhidden=nodes;
 alpha = 0.9;
@@ -142,16 +144,18 @@ out1 = 2 ./ (1+exp(-oin)) - 1;
 
 
 figure(3)
-plot(xtest,out1)
+plot(xtest,out1, 'r*')
 hold on
-plot(xtest,fun1test)
+plot(xtesttrue,sin(2*xtesttrue))
 title("Perceptron. Sine wave")
+ylim([-1.2 1.2])
+xlim([0, 2*pi])
 hold off
 
 %% two layers perceptron square
 
 ndata=length(x);
-epochs = 200;
+epochs = 2000;
 eta=0.001;
 Nhidden=nodes;
 alpha = 0.9;
@@ -191,9 +195,11 @@ oin = v * hout;
 out2 = 2 ./ (1+exp(-oin)) - 1;
 
 figure(4)
-plot(xtest,out2)
+plot(xtest,out2,'r*')
 hold on
-plot(xtest,fun2test)
-title("Perceptron. Sine wave")
+plot(xtesttrue,sign(sin(2*xtesttrue)))
+title("Perceptron. Square wave")
+ylim([-1.2 1.2])
+xlim([0, 2*pi])
 hold off
 

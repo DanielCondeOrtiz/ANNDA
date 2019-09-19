@@ -2,13 +2,12 @@ close all
 clear all
 
 %% data
-x = 0:0.1:2*pi;
-x = x + 0.1*randn(1,length(x));
+xtrue = 0:0.1:2*pi;
 
-xtest = 0.05:0.1:2*pi;
-xtest = xtest + 0.1*randn(1,length(xtest));
+xtesttrue = 0.05:0.1:2*pi;
+xtest = xtesttrue + 0.1*randn(1,length(xtesttrue));
 
-fun1test = sin(2*xtest);
+fun1test = sin(2*xtesttrue) + 0.1*randn(1,length(xtesttrue));
 
 phi_i = @(x,mu,sigma) exp((-(x-mu).^2)/(2*sigma));
 
@@ -22,7 +21,9 @@ eta = 0.01;%??????
 %% training sin
 %delta rule
 figure(1)
-subplot(2,2,1)
+xlabel('Number of nodes')
+ylabel('MAE')
+ylim([0,4])
 hold on
 
 for width = widths
@@ -31,8 +32,10 @@ for width = widths
         mu = 0:((2*pi)/(node-1)):2*pi;
         w = randn(node);
         for i=1:epochs
-            x = x(randperm(length(x)));
-            fun1= sin(2*x);
+            permu = randperm(length(xtrue));
+            x = xtrue(permu)+ 0.1*randn(1,length(xtrue));
+            fun1= sin(2*xtrue) + 0.1*randn(1,length(xtrue));
+            fun1 = fun1(permu);
             for j = 1:length(x)
                 phi = [];
                 for k=1:node
@@ -65,14 +68,15 @@ hold off
 
 %batch
 
-x = 0:0.1:2*pi;
-x = x + 0.1*randn(1,length(x));
+x = xtrue + 0.1*randn(1,length(xtrue));
 
-fun1= sin(2*x);
+fun1= sin(2*xtrue) + 0.1*randn(1,length(xtrue));
 
-subplot(2,2,2)
+figure(2)
+xlabel('Number of nodes')
+ylabel('MAE')
 hold on
-ylim([0, max(errors)])
+ylim([0,4])
 
 for width = widths
     errors = [];
@@ -115,9 +119,12 @@ hold off
 %delta rule
 errors = [];
 
-subplot(2,2,3)
+figure(3)
+xlabel('Number of nodes')
+ylabel('MAE')
 hold on
-fun2test = sign(sin(2*xtest));
+ylim([0,4])
+fun2test = sign(sin(2*xtesttrue)) + 0.1*randn(1,length(xtrue));
 
 
 for width = widths
@@ -126,8 +133,10 @@ for width = widths
         mu = 0:((2*pi)/(node-1)):2*pi;
         w = randn(node);
         for i=1:epochs
-            x = x(randperm(length(x)));
-            fun2= sign(sin(2*x));
+            permu = randperm(length(xtrue));
+            x = xtrue(permu)+ 0.1*randn(1,length(xtrue));
+            fun2= sign(sin(2*xtrue)) + 0.1*randn(1,length(xtrue));
+            fun2 = fun2(permu);
             for j = 1:length(x)
                 phi = [];
                 for k=1:node
@@ -160,15 +169,16 @@ hold off
 
 %batch
 
-x = 0:0.1:2*pi;
-x = x + 0.1*randn(1,length(x));
+x = xtrue + 0.1*randn(1,length(xtrue));
 
-fun1= sin(2*x);
-fun2 = sign(fun1);
+fun2= sign(sin(2*xtrue)) + 0.1*randn(1,length(xtrue));
 
-subplot(2,2,4)
+
+figure(4)
+xlabel('Number of nodes')
+ylabel('MAE')
 hold on
-ylim([0, max(errors)])
+ylim([0,4])
 
 for width = widths
     errors = [];

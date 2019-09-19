@@ -2,11 +2,12 @@ close all
 clear all
 
 %% data
-x = 0:0.1:2*pi;
+xtrue = 0:0.1:2*pi;
 
-xtest = 0.05:0.1:2*pi;
+xtesttrue = 0.05:0.1:2*pi;
+xtest = xtesttrue + 0.1*randn(1,length(xtesttrue));
 
-fun1test = sin(2*xtest);
+fun1test = sin(2*xtesttrue) + 0.1*randn(1,length(xtesttrue));
 
 phi_i = @(x,mu,sigma) exp((-(x-mu).^2)/(2*sigma));
 
@@ -20,19 +21,21 @@ eta = 0.01;%??????
 %% training sin
 %delta rule
 figure(1)
-hold on
 xlabel('Number of nodes')
 ylabel('MAE')
 ylim([0,4])
+hold on
 
 for width = widths
     errors = [];
     for node = nodes
-        mu = 0:((2*pi)/(node-1)):2*pi;
+        mu = 2*pi*rand(1,node);
         w = randn(node);
         for i=1:epochs
-            x = x(randperm(length(x)));
-            fun1= sin(2*x);
+            permu = randperm(length(xtrue));
+            x = xtrue(permu)+ 0.1*randn(1,length(xtrue));
+            fun1= sin(2*xtrue) + 0.1*randn(1,length(xtrue));
+            fun1 = fun1(permu);
             for j = 1:length(x)
                 phi = [];
                 for k=1:node
@@ -65,20 +68,20 @@ hold off
 
 %batch
 
-x = 0:0.1:2*pi;
+x = xtrue + 0.1*randn(1,length(xtrue));
 
-fun1= sin(2*x);
+fun1= sin(2*xtrue) + 0.1*randn(1,length(xtrue));
 
 figure(2)
-hold on
 xlabel('Number of nodes')
 ylabel('MAE')
+hold on
 ylim([0,4])
 
 for width = widths
     errors = [];
     for node = nodes
-        mu = 0:((2*pi)/(node-1)):2*pi;
+        mu = 2*pi*rand(1,node);
         
         phi=[];
         for i=1:node
@@ -92,7 +95,7 @@ for width = widths
         
         w = linsolve(A,B);
         
-
+        
         fout1 = zeros(1,length(xtest));
         for j=1:length(xtest)
             tmp = 0;
@@ -115,21 +118,25 @@ hold off
 %% training square
 %delta rule
 errors = [];
+
 figure(3)
-hold on
 xlabel('Number of nodes')
 ylabel('MAE')
-fun2test = sign(sin(2*xtest));
+hold on
 ylim([0,4])
+fun2test = sign(sin(2*xtesttrue)) + 0.1*randn(1,length(xtrue));
+
 
 for width = widths
     errors = [];
     for node = nodes
-        mu = 0:((2*pi)/(node-1)):2*pi;
+        mu = 2*pi*rand(1,node);
         w = randn(node);
         for i=1:epochs
-            x = x(randperm(length(x)));
-            fun2= sign(sin(2*x));
+            permu = randperm(length(xtrue));
+            x = xtrue(permu)+ 0.1*randn(1,length(xtrue));
+            fun2= sign(sin(2*xtrue)) + 0.1*randn(1,length(xtrue));
+            fun2 = fun2(permu);
             for j = 1:length(x)
                 phi = [];
                 for k=1:node
@@ -162,24 +169,21 @@ hold off
 
 %batch
 
-x = 0:0.1:2*pi;
+x = xtrue + 0.1*randn(1,length(xtrue));
 
-fun1= sin(2*x);
-fun2 = sign(fun1);
-fun2(1)=1;
+fun2= sign(sin(2*xtrue)) + 0.1*randn(1,length(xtrue));
 
 
-errors = [];
 figure(4)
-hold on
 xlabel('Number of nodes')
 ylabel('MAE')
+hold on
 ylim([0,4])
 
 for width = widths
     errors = [];
     for node = nodes
-        mu = 0:((2*pi)/(node-1)):2*pi;
+        mu = 2*pi*rand(1,node);
         
         phi=[];
         for i=1:node
@@ -193,7 +197,7 @@ for width = widths
         
         w = linsolve(A,B);
         
-
+        
         fout2 = zeros(1,length(xtest));
         for j=1:length(xtest)
             tmp = 0;
@@ -213,6 +217,6 @@ title('Batch Learning. Square wave')
 legend('Width=0.0001','Width=0.001','Width=0.01','Width=0.1','Width=0.5')
 hold off
 
-
+%sgtitle('Noide added. Error by n. of nodes and width of spread')
 
 
