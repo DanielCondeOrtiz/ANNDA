@@ -16,17 +16,17 @@ fun2test = sign(sin(2*xtesttrue)) + 0.1*randn(1,length(xtesttrue));
 
 phi_i = @(x,mu,sigma) exp((-(x-mu).^2)/(2*sigma));
 
-width = 0.1; %????
+width = 0.01; %????
 %how measure error????
 
 
 %% training sin
 %batch
 
-errors = [];
-nodes = 40;
+nodes = 30;
 mu = 0:((2*pi)/(nodes-1)):2*pi;
 
+tic
 phi=[];
 for i=1:nodes
     phi=[phi; phi_i(x,mu(i),width)];
@@ -39,6 +39,7 @@ B = phi' * fun1';
 
 w = linsolve(A,B);
 
+timebatchsine = toc;
 
 fout1 = zeros(1,length(xtest));
 for j=1:length(xtest)
@@ -65,6 +66,7 @@ hold off
 errors = [];
 mu = 0:((2*pi)/(nodes-1)):2*pi;
 
+tic
 phi=[];
 for i=1:nodes
     phi=[phi; phi_i(x,mu(i),width)];
@@ -76,7 +78,7 @@ A = phi' * phi;
 B = phi' * fun2';
 
 w = linsolve(A,B);
-
+timebatchsquare = toc;
 
 fout2 = zeros(1,length(xtest));
 for j=1:length(xtest)
@@ -87,8 +89,6 @@ for j=1:length(xtest)
     fout2(j) = tmp;
 end
 
-
-
 figure(2)
 plot(xtest,fout2,'r*')
 hold on
@@ -98,16 +98,13 @@ ylim([-1.2 1.2])
 xlim([0, 2*pi])
 hold off
 
-
-
 %% two layers perceptron sine
 
 ndata=length(x);
-epochs = 2000;
+epochs = 2000000;
 eta=0.001;
 Nhidden=nodes;
 alpha = 0.9;
-
 
 w=randn(nodes,1); %N1, N0
 v=randn(1,nodes+1); %N2, N1
@@ -117,6 +114,7 @@ dv=0;
 patterns = x;
 targets = fun1;
 
+tic
 for i=1:epochs
     %forward pass
     hin = w * patterns;
@@ -136,6 +134,7 @@ for i=1:epochs
     v = v + dv .* eta;    
     
 end
+timepercsine = toc;
 
 hin = w * xtest;
 hout = [2 ./ (1+exp(-hin)) - 1 ; ones(1,ndata)];
@@ -154,13 +153,6 @@ hold off
 
 %% two layers perceptron square
 
-ndata=length(x);
-epochs = 2000;
-eta=0.001;
-Nhidden=nodes;
-alpha = 0.9;
-
-
 w=randn(nodes,1); %N1, N0
 v=randn(1,nodes+1); %N2, N1
 dw=0;
@@ -169,6 +161,8 @@ dv=0;
 patterns = x;
 targets = fun2;
 
+
+tic
 for i=1:epochs
     %forward pass
     hin = w * patterns;
@@ -188,6 +182,7 @@ for i=1:epochs
     v = v + dv .* eta;    
     
 end
+timepercsquare = toc;
 
 hin = w * xtest;
 hout = [2 ./ (1+exp(-hin)) - 1 ; ones(1,ndata)];
@@ -202,4 +197,16 @@ title("Perceptron. Square wave")
 ylim([-1.2 1.2])
 xlim([0, 2*pi])
 hold off
+
+
+display("Time batch sine:" + timebatchsine)
+display("Time batch square:" + timebatchsquare)
+display("Time perceptron sine:" + timepercsine)
+display("Time perceptron square:" + timepercsquare)
+
+display("MAE batch sine:" + mean(abs(fun1test - fout1)))
+display("MAE batch square:" + mean(abs(fun2test - fout2)))
+display("MAE perceptron sine:" + mean(abs(fun1test - out1)))
+display("MAE perceptron square:" + mean(abs(fun2test - out2)))
+
 
