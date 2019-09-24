@@ -35,11 +35,14 @@ for p = 1:num_of_patterns
     while converged == 0 && epoch<limit
         epoch = epoch + 1;
         xd_update = sign(w*xd(p,:)')';
+%         xd_update = sign(w*x(p,:)')';
         check = (xd_update == xd(p,:));
+%         check = (xd_update == x(p,:));
         if sum(check)==numel(check)
             converged = 1;
         else
             xd(p,:) = xd_update;
+%             x(p,:) = xd_update;
         end
     end
 end
