@@ -25,7 +25,7 @@ end
 w = w-diag(diag(w));
 
 %% testing
-limit = 100;
+limit = 1000;
 [num_of_patterns, num_of_elements] = size(xd);
 
 for p = 1:num_of_patterns
