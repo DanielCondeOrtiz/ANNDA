@@ -62,8 +62,8 @@ for p = 1:num_of_patterns
         
         % plot the current image
         if mod(epoch,100) == 0
-            num_of_figure = num_of_figure + 1;
-            figure(num_of_figure)
+%             num_of_figure = num_of_figure + 1;
+%             figure(num_of_figure)
             imshow(reshape(p_test(p,:),[32 32]))
         end
     end

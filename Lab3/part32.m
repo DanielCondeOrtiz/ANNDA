@@ -34,7 +34,7 @@ w = w-diag(diag(w));
 p_test = p_train;
 
 limit = 10000;
-[num_of_patterns, num_of_elements] = size(p_test);
+[num_of_patterns, ~] = size(p_test);
 
 for p = 1:num_of_patterns
     converged = 0;
@@ -63,7 +63,7 @@ end
 
 display(isstable);
 
-%% part 2: stability check
+%% part 2: degraded pattern
 p_test = [p10;p11];
 
 limit = 10000;
