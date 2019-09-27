@@ -53,7 +53,9 @@ for p = 1:num_of_patterns
     w = w + p_train(p,:)'*p_train(p,:);
 end
 
-w = w-diag(diag(w));
+w = w./1024;
+
+%w = w-diag(diag(w));
 
 
 p_test = [p10;p11];
@@ -106,10 +108,10 @@ for e = 1:2
     hold on
 end
 
-title('Error for sequential update')
+title('Energy for sequential update')
 legend('P10','P11')
 xlabel('Iterations')
-ylabel('Error')
+ylabel('Energy')
 
 hold off
 
@@ -123,11 +125,13 @@ hold off
 
 w = randn(num_of_elements);
 
+w = w./1024;
+
 % for p = 1:num_of_patterns
 %     w = w + p_train(p,:)'*p_train(p,:);
 % end
 
-w = w-diag(diag(w));
+%w = w-diag(diag(w));
 
 p_test = [p10;p11];
 
@@ -182,10 +186,10 @@ end
 
 
 
-title('Error for sequential update with random weights')
+title('Energy for sequential update with random weights')
 legend('P10','P11')
 xlabel('Iterations')
-ylabel('Error')
+ylabel('Energy')
 
 hold off
 
@@ -199,11 +203,14 @@ w = randn(num_of_elements);
 
 w = 0.5*(w+w');
 
+w = w./1024;
+
+
 % for p = 1:num_of_patterns
 %     w = w + p_train(p,:)'*p_train(p,:);
 % end
 
-w = w-diag(diag(w));
+%w = w-diag(diag(w));
 
 p_test = [p10;p11];
 
@@ -256,9 +263,9 @@ for e = 1:2
     hold on
 end
 
-title('Error for sequential update with random symmetric weights')
+title('Energy for seq. update with random sym. weights')
 legend('P10','P11')
 xlabel('Iterations')
-ylabel('Error')
+ylabel('Energy')
 
 hold off

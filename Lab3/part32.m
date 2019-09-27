@@ -28,7 +28,7 @@ for p = 1:num_of_patterns
     w = w + p_train(p,:)'*p_train(p,:);
 end
 
-w = w-diag(diag(w));
+%w = w-diag(diag(w));
 
 %% part 1: stability check
 p_test = p_train;

@@ -21,7 +21,7 @@ for p = 1:num_of_patterns
     w = w + x(p,:)'*x(p,:);
 end
 
-w = w-diag(diag(w));
+%w = w-diag(diag(w));
 
 %% testing
 
