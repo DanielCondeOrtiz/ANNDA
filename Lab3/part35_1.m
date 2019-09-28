@@ -76,28 +76,27 @@ for nweights = 3:6
         epoch = 0;
 
         while converged == 0 && epoch<limit
-            epoch = epoch + 1;
 %batch
-%             epoch = epoch + 1;
-%             update = sign(w*p_test(p,:)')';
-%             check = (update == p_test(p,:));
-%             if sum(check)==numel(check)
-%                 converged = 1;
-%             else
-%                 p_test(p,:) = update;
-%             end
+            epoch = epoch + 1;
+            update = sign(w*p_test(p,:)')';
+            check = (update == p_test(p,:));
+            if sum(check)==numel(check)
+                converged = 1;
+            else
+                p_test(p,:) = update;
+            end
             
 %random unit
-            unit = randi([1, num_of_elements]);
-
-            update = sign(w(unit,:)*p_test(p,:)')';
-            p_test(p,unit) = update;
-
-            %checking
-            update = sign(w*p_test(p,:)')';            
-            if sum(update == p_test(p,:))==1024
-                converged = 1;
-            end
+%             unit = randi([1, num_of_elements]);
+% 
+%             update = sign(w(unit,:)*p_test(p,:)')';
+%             p_test(p,unit) = update;
+% 
+%             %checking
+%             update = sign(w*p_test(p,:)')';            
+%             if sum(update == p_test(p,:))==1024
+%                 converged = 1;
+%             end
 
 
     %         % plot the current image

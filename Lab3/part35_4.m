@@ -32,20 +32,15 @@ for nweights = 1:300
     p_test = p_test_true(1:nweights,:);
     
     w = w + p_train(nweights,:)'*p_train(nweights,:);
-    %w = w-diag(diag(w));
     
     [num_of_patterns, num_of_elements] = size(p_test);
 
-    %noise
-%     pos = randi([1 1024],[nweights noisebits]);
-%     p_test(pos) = -p_test(pos);
-    
+
     for p = 1:nweights
         converged = 0;
         epoch = 0;
 
         while converged == 0 && epoch<limit
-            epoch = epoch + 1;
 %batch
             epoch = epoch + 1;
             update = sign(w*p_test(p,:)')';
@@ -55,33 +50,13 @@ for nweights = 1:300
             else
                 p_test(p,:) = update;
             end
-            
-%random unit
-%             unit = randi([1, num_of_elements]);
-% 
-%             update = sign(w(unit,:)*p_test(p,:)')';
-%             p_test(p,unit) = update;
-% 
-%             %checking
-%             update = sign(w*p_test(p,:)')';            
-%             if sum(update == p_test(p,:))==1024
-%                 converged = 1;
-%             end
-% 
+
         end
         %epochs(p) = epoch;
     end
 
-    total = 0;
-    for p = 1:nweights
-        identified = sum(ismember(p_test(p,:),p_train,'rows'));
-        if identified == 1
-            total = total + 1;
-        end        
-    end
-    disp("**Total matches for " + nweights + ": " + total)
 
-    stables(nweights) = total;
+    stables(nweights) = sum(ismember(p_test,p_train,'rows'));
     
 end
 
@@ -93,7 +68,7 @@ save('./stables_nonoise.mat','stables')
 
 limit = 1000000;
 
-noisebits = 2;
+noisebits = 10;
 
 p_test_true = [];
 p_test = [];
@@ -118,20 +93,18 @@ for nweights = 1:300
     p_test = p_test_true(1:nweights,:);
     
     w = w + p_train(nweights,:)'*p_train(nweights,:);
-    %w = w-diag(diag(w));
     
     [num_of_patterns, num_of_elements] = size(p_test);
 
     %noise
-%     pos = randi([1 1024],[nweights noisebits]);
-%     p_test(pos) = -p_test(pos);
+    pos = randi([1 100],[nweights noisebits]);
+    p_test(pos) = -p_test(pos);
     
     for p = 1:nweights
         converged = 0;
         epoch = 0;
 
         while converged == 0 && epoch<limit
-            epoch = epoch + 1;
 %batch
             epoch = epoch + 1;
             update = sign(w*p_test(p,:)')';
@@ -142,32 +115,11 @@ for nweights = 1:300
                 p_test(p,:) = update;
             end
             
-%random unit
-%             unit = randi([1, num_of_elements]);
-% 
-%             update = sign(w(unit,:)*p_test(p,:)')';
-%             p_test(p,unit) = update;
-% 
-%             %checking
-%             update = sign(w*p_test(p,:)')';            
-%             if sum(update == p_test(p,:))==1024
-%                 converged = 1;
-%             end
-% 
         end
         %epochs(p) = epoch;
     end
 
-    total = 0;
-    for p = 1:nweights
-        identified = sum(ismember(p_test(p,:),p_train,'rows'));
-        if identified == 1
-            total = total + 1;
-        end        
-    end
-    disp("**Total matches for " + nweights + ": " + total)
-
-    stables_noise(nweights) = total;
+    stables_noise(nweights) = sum(ismember(p_test,p_train,'rows'));
     
 end
 
