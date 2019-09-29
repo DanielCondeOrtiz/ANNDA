@@ -9,7 +9,7 @@ limit = 100000;
 w = zeros(100);
 
 
-p_new = randi([0 1],[300 100])*2 -1;
+p_new = sign(0.5+randn(300,100));
 p_train = [];
 p_test = [];
 p_test_true = p_new;
@@ -57,7 +57,7 @@ for nweights = 1:300
     
 end
 
-save('./stables_nonoise.mat','stables')
+save('./stables_nonoise_biased.mat','stables')
 
 
 %% testing number of weights (noise)
@@ -65,7 +65,7 @@ save('./stables_nonoise.mat','stables')
 
 limit = 100000;
 
-noisebits = 10;
+noisebits = 2;
 
 p_test_true = [];
 p_test = [];
@@ -73,7 +73,7 @@ p_train = [];
 w = zeros(100);
 
 
-p_new = randi([0 1],[300 100])*2 -1;
+p_new = sign(0.5+randn(300,100));
 p_train = [];
 p_test = [];
 p_test_true = p_new;
@@ -127,7 +127,7 @@ for nweights = 1:300
 end
 
 
-save('./stables_noise10.mat','stables_noise')
+save('./stables_noise_biased2.mat','stables_noise')
 
 
 %% plot
@@ -135,7 +135,7 @@ figure(1)
 plot(stables)
 hold on
 plot(stables_noise)
-title('Stable patterns by N. patterns learned (diagonal removed)')
+title('Stable patterns by N. patterns learned (diagonal removed and biased)')
 xlabel('Number of patterns learned')
 ylabel('Stable patterns')
 legend('No noise','Noise')

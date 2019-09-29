@@ -57,14 +57,14 @@ for noisy_elements = 1:num_of_elements+1
         converged = 0;
         epoch = 0;
         
-        while converged == 0 && epoch<limit
+        while converged < 5 && epoch<limit
             epoch = epoch + 1;
             xd_update = sign(w*xd(p,:)')';
             %         xd_update = sign(w*x(p,:)')';
             check = (xd_update == xd(p,:));
             %         check = (xd_update == x(p,:));
             if sum(check)==numel(check)
-                converged = 1;
+                converged = converged + 1;
             else
                 xd(p,:) = xd_update;
                 %             x(p,:) = xd_update;
@@ -89,8 +89,8 @@ x_label = 0:0.125:1;
 xticklabels(num2str(x_label(:)))
 if noise_or_dist
     xlabel('Noise in % on elements');
-    title('Accuracy of restored pattterns depending on the noise')
+    title('Accuracy of restored patterns depending on the noise')
 else
     xlabel('Distortion in % on elements');
-    title('Accuracy of restored pattterns depending on the distortion')
+    title('Accuracy of restored patterns depending on the distortion (extra steps)')
 end

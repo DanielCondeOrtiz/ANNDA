@@ -60,8 +60,6 @@ for nweights = 1:300
     
 end
 
-save('./stables_nonoise.mat','stables')
-
 
 %% testing number of weights (noise)
 
@@ -123,8 +121,6 @@ for nweights = 1:300
     
 end
 
-
-save('./stables_noise2.mat','stables_noise')
 
 figure(1)
 plot(stables)
