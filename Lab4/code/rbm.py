@@ -55,10 +55,10 @@ class RestrictedBoltzmannMachine():
         
         self.momentum = 0.7
 
-        self.print_period = 5000
+        self.print_period = 1500
         
         self.rf = { # receptive-fields. Only applicable when visible layer is input data
-            "period" : 5000, # iteration period to visualize
+            "period" : 1500, # iteration period to visualize
             "grid" : [5,5], # size of the grid
             "ids" : np.random.randint(0,self.ndim_hidden,25) # pick some random hidden units
             }
@@ -66,7 +66,7 @@ class RestrictedBoltzmannMachine():
         return
 
         
-    def cd1(self,visible_trainset, n_iterations=10000):
+    def cd1(self,visible_trainset, n_iterations=3000):
         
         """Contrastive Divergence with k=1 full alternating Gibbs sampling
 
@@ -81,11 +81,33 @@ class RestrictedBoltzmannMachine():
 
         for it in range(n_iterations):
 
-            # positive phase
+            v_0 = np.zeros([self.batch_size,self.ndim_visible])
+            h_0 = np.zeros([self.batch_size,self.ndim_hidden])
+            v_k = np.zeros([self.batch_size,self.ndim_visible])
+            h_k = np.zeros([self.batch_size,self.ndim_hidden])
+                          
+            v_0 = visible_trainset[self.batch_size*(it):self.batch_size*(it+1)]
             
-            # negative phase
+            h_0 = self.get_h_given_v(v_0)[1]
+
+            v_old = v_0
+            h_old = h_0
+            
+            converged = 0
+                
+            while converged == 0:                
+                # negative phase                
+                v_new = self.get_v_given_h(h_old)[1]
+                
+                # positive phase
+                h_new = self.get_h_given_v(v_old)[1]
+
+                if (v_new==v_old).all() and (h_new==h_old).all():
+                    converged = 1
 
             # updating parameters
+
+            self.update_params(v_0,h_0,v_new,h_new)
             
             # visualize once in a while when visible layer is input images
             
@@ -103,11 +125,11 @@ class RestrictedBoltzmannMachine():
     
 
     def update_params(self,v_0,h_0,v_k,h_k):
-
+    
         """Update the weight and bias parameters.
-
+    
         You could also add weight decay and momentum for weight updates.
-
+    
         Args:
            v_0: activities or probabilities of visible layer (data to the rbm)
            h_0: activities or probabilities of hidden layer
@@ -115,35 +137,43 @@ class RestrictedBoltzmannMachine():
            h_k: activities or probabilities of hidden layer
            all args have shape (size of mini-batch, size of respective layer)
         """
-
-        self.delta_bias_v += 0
-        self.delta_weight_vh += 0
-        self.delta_bias_h += 0
-        
+        self.delta_bias_v = 0
+        self.delta_weight_vh = 0
+        self.delta_bias_h = 0
+    
+        for i in range(v_0.shape[0]):
+            self.delta_bias_v += self.learning_rate*(v_0[i] - v_k[i])
+            self.delta_weight_vh += self.learning_rate*(np.outer(v_0[i],h_0[i])-np.outer(v_k[i],h_k[i]))
+            self.delta_bias_h += self.learning_rate*(h_0[i] - h_k[i])
+    
         self.bias_v += self.delta_bias_v
         self.weight_vh += self.delta_weight_vh
         self.bias_h += self.delta_bias_h
-        
+    
         return
 
     def get_h_given_v(self,visible_minibatch):
-        
-        """Compute probabilities p(h|v) and activations h ~ p(h|v) 
-
+    
+        """Compute probabilities p(h|v) and activations h ~ p(h|v)
+    
         Uses undirected weight "weight_vh" and bias "bias_h"
-        
-        Args: 
+    
+        Args:
            visible_minibatch: shape is (size of mini-batch, size of visible layer)
-        Returns:        
-           tuple ( p(h|v) , h) 
+        Returns:
+           tuple ( p(h|v) , h)
            both are shaped (size of mini-batch, size of hidden layer)
         """
-        
+    
         assert self.weight_vh is not None
-
+    
         n_samples = visible_minibatch.shape[0]
-        
-        return np.zeros((n_samples,self.ndim_hidden)), np.zeros((n_samples,self.ndim_hidden))
+    
+        ph = sigmoid(self.bias_h + np.dot(visible_minibatch,self.weight_vh))
+    
+        h = np.where(ph>0.5, 1, 0)
+    
+        return ph, h
 
 
     def get_v_given_h(self,hidden_minibatch):
