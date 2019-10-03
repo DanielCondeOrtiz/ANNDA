@@ -1,4 +1,5 @@
 from util import *
+import time
 
 class RestrictedBoltzmannMachine():
     '''
@@ -64,10 +65,10 @@ class RestrictedBoltzmannMachine():
         #weight decay (L2)
         self.w_decay = 0.0001
 
-        self.print_period = 5000
+        self.print_period = 1500
 
         self.rf = { # receptive-fields. Only applicable when visible layer is input data
-            "period" : 5000, # iteration period to visualize
+            "period" : 3000, # iteration period to visualize
             "grid" : [5,5], # size of the grid
             "ids" : np.random.randint(0,self.ndim_hidden,25) # pick some random hidden units
             }
@@ -75,7 +76,7 @@ class RestrictedBoltzmannMachine():
         return
 
 
-    def cd1(self,visible_trainset, n_iterations=10000):
+    def cd1(self,visible_trainset, n_iterations=3000):
 
         """Contrastive Divergence with k=1 full alternating Gibbs sampling
 
@@ -86,41 +87,50 @@ class RestrictedBoltzmannMachine():
 
         print ("learning CD1")
 
-        n_samples = visible_trainset.shape[0]
+        #n_samples = visible_trainset.shape[0]
 
-        #epoch??
-        for it in range(n_iterations):
+        epoch_max = 20
+        
+        for epoch in range(epoch_max):
+            start = time.time()            
+            print("epoch "+str(epoch))
 
-            if it % 250 == 0:
-                print(it)
+            for it in range(n_iterations):
+    
+                if it % 250 == 0:
+                    print("iteration: "+str(it))
+    
+                #SEE THIS: https://en.wikipedia.org/wiki/Restricted_Boltzmann_machine#Training_algorithm
+                #IT EXPLAINS CD1
+    
+                # positive phase
+                v_0 = visible_trainset[self.batch_size*(it):self.batch_size*(it+1)]
+                h_0 = self.get_h_given_v(v_0)[1]
+    
+                # negative phase
+                v_k = self.get_v_given_h(h_0)[1]
+                h_k = self.get_h_given_v(v_k)[1]
+    
+                # updating parameters
+                self.update_params(v_0,h_0,v_k,h_k)
+    
+                # visualize once in a while when visible layer is input images
+    
+                if it % (self.rf["period"] -1) == 0 and self.is_bottom:
+    
+                    viz_rf(weights=self.weight_vh[:,self.rf["ids"]].reshape((self.image_size[0],self.image_size[1],-1)), it=it, grid=self.rf["grid"], total_it=n_iterations,units=self.ndim_hidden,epochs=epoch)
+    
+                # print progress
+    
+                #?????????????????????????
+                #it was (visible_trainset - visible_trainset)
+                if it % (self.print_period -1) == 0 :
+    
+                    print ("Iterations=%5d, units=%3d, iteration=%5d recon_loss=%4.4f"%(n_iterations,self.ndim_hidden,it+1, np.linalg.norm(visible_trainset - self.get_v_given_h(self.get_h_given_v(visible_trainset)[1])[1])))
 
-            #SEE THIS: https://en.wikipedia.org/wiki/Restricted_Boltzmann_machine#Training_algorithm
-            #IT EXPLAINS CD1
-
-            # positive phase
-            v_0 = visible_trainset[self.batch_size*(it):self.batch_size*(it+1)]
-            h_0 = self.get_h_given_v(v_0)[1]
-
-            # negative phase
-            v_k = self.get_v_given_h(h_0)[1]
-            h_k = self.get_h_given_v(v_k)[1]
-
-            # updating parameters
-            self.update_params(v_0,h_0,v_k,h_k)
-
-            # visualize once in a while when visible layer is input images
-
-            if it % (self.rf["period"] -1) == 0 and self.is_bottom:
-
-                viz_rf(weights=self.weight_vh[:,self.rf["ids"]].reshape((self.image_size[0],self.image_size[1],-1)), it=it, grid=self.rf["grid"], total_it=n_iterations,units=self.ndim_hidden)
-
-            # print progress
-
-            #?????????????????????????
-            #it was (visible_trainset - visible_trainset)
-            if it % (self.print_period -1) == 0 :
-
-                print ("Iterations=%5d, units=%3d, iteration=%5d recon_loss=%4.4f"%(n_iterations,self.ndim_hidden,it+1, np.linalg.norm(visible_trainset - self.get_v_given_h(self.get_h_given_v(visible_trainset)[1])[1])))
+            end = time.time()
+            print("time for epoch "+ str(epoch) +": "+str(end - start)+"s")
+    
 
         #maybe mean, i dont know
         return np.linalg.norm(visible_trainset - self.get_v_given_h(self.get_h_given_v(visible_trainset)[1])[1])

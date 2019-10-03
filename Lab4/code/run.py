@@ -85,7 +85,7 @@ if __name__ == "__main__":
                                      batch_size=20
     )
 
-    rbm.cd1(visible_trainset=train_imgs, n_iterations=10000)
+    rbm.cd1(visible_trainset=train_imgs, n_iterations=3000)
 
     #first point
     #threads so it doesn't take forever

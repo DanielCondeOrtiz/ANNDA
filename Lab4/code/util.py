@@ -102,7 +102,7 @@ def read_mnist(dim=[28,28],n_train=60000,n_test=1000):
 
     return train_imgs[:n_train],train_lbls_1hot[:n_train],test_imgs[:n_test],test_lbls_1hot[:n_test]
 
-def viz_rf(weights,it,grid,total_it,units):
+def viz_rf(weights,it,grid,total_it,units,epochs=0):
 
     """
     Visualize receptive fields and save
@@ -115,7 +115,7 @@ def viz_rf(weights,it,grid,total_it,units):
             axs[x,y].set_xticks([])
             axs[x,y].set_yticks([])
             axs[x,y].imshow(weights[:,:,y+grid[1]*x], cmap="bwr", vmin=-imax, vmax=imax, interpolation=None)
-    plt.savefig("rf.iter%05d_%05d_%3d.png"%(it,total_it,units))
+    plt.savefig("rf.ep%02d_iter%05d_%05d_%3d.png"%(epochs,it,total_it,units))
     plt.close('all')
 
 def stitch_video(fig,imgs):
