@@ -122,7 +122,8 @@ class RestrictedBoltzmannMachine():
 
                 print ("Iterations=%5d, units=%3d, iteration=%5d recon_loss=%4.4f"%(n_iterations,self.ndim_hidden,it+1, np.linalg.norm(visible_trainset - self.get_v_given_h(self.get_h_given_v(visible_trainset)[1])[1])))
 
-        return
+        #maybe mean, i dont know
+        return np.linalg.norm(visible_trainset - self.get_v_given_h(self.get_h_given_v(visible_trainset)[1])[1])
 
 
     def update_params(self,v_0,h_0,v_k,h_k):
