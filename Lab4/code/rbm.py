@@ -313,11 +313,15 @@ class RestrictedBoltzmannMachine():
            all args have shape (size of mini-batch, size of respective layer)
         """
 
-        self.delta_weight_h_to_v += 0
-        self.delta_bias_v += 0
+        self.delta_bias_v = 0
+        self.delta_weight_h_to_v = 0
 
-        self.weight_h_to_v += self.delta_weight_h_to_v
-        self.bias_v += self.delta_bias_v
+        for i in range(inps.shape[0]):
+            self.delta_bias_v += trgs[i] - preds[i]
+            self.delta_weight_h_to_v += np.outer(inps[i],(trgs[i] - preds[i]))
+
+        self.bias_v += self.learning_rate*self.delta_bias_v
+        self.weight_h_to_v += self.learning_rate*self.delta_weight_h_to_v
 
         return
 
@@ -332,10 +336,14 @@ class RestrictedBoltzmannMachine():
            all args have shape (size of mini-batch, size of respective layer)
         """
 
-        self.delta_weight_v_to_h += 0
-        self.delta_bias_h += 0
+        self.delta_bias_h = 0
+        self.delta_weight_v_to_h = 0
 
-        self.weight_v_to_h += self.delta_weight_v_to_h
-        self.bias_h += self.delta_bias_h
+        for i in range(inps.shape[0]):
+            self.delta_bias_h += trgs[i] - preds[i]
+            self.delta_weight_v_to_h += np.outer(inps[i],(trgs[i] - preds[i]))
+
+        self.bias_h += self.learning_rate*self.delta_bias_h
+        self.weight_v_to_h += self.learning_rate*self.delta_weight_v_to_h
 
         return
