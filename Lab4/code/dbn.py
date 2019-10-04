@@ -272,34 +272,62 @@ class DeepBeliefNet():
                 """
                 wake-phase : drive the network bottom-to-top using visible and label data
                 """
-
+                mini_batch = vis_trainset[self.batch_size*(it):self.batch_size*(it+1)]
+                
+                vtoh = self.rbm_stack["vis--hid"].get_h_given_v_dir(mini_batch)[0]
+                htop = self.rbm_stack["hid--pen"].get_h_given_v_dir(vtoh)[0]
+                ptot = self.rbm_stack["pen+lbl--top"].get_h_given_v(np.append(htop,lbl_trainset,axis=1))[0]
+                     
+                v_k = htop
+                h_k = ptot
+         
                 """
                 alternating Gibbs sampling in the top RBM : also store neccessary information for learning this RBM
                 """
+                for i in range(self.n_gibbs_wakesleep-1):
+                    v_k = self.rbm_stack["pen+lbl--top"].get_v_given_h(h_k)[0]
+                    h_k = self.rbm_stack["pen+lbl--top"].get_h_given_v(v_k)[0]
+
 
                 """
                 sleep phase : from the activities in the top RBM, drive the network top-to-bottom
                 """
+                ptot = h_k                
+                
+                ttop = self.rbm_stack["pen+lbl--top"].get_v_given_h(ptot)[0]
+                ptoh = self.rbm_stack["hid--pen"].get_v_given_h_dir(ttop[:,:-10])[0]
+                htov = self.rbm_stack["vis--hid"].get_v_given_h_dir(ptoh)[0]
 
                 """
                 predictions : compute generative predictions from wake-phase activations,
                               and recognize predictions from sleep-phase activations
                 """
+                pred_htov = self.rbm_stack["vis--hid"].get_v_given_h_dir(vtoh)[0]
+                pred_ptoh = self.rbm_stack["hid--pen"].get_v_given_h_dir(htop)[0]
+
+                pred_htop = self.rbm_stack["hid--pen"].get_h_given_v_dir(ptoh)[0]
+                pred_vtoh = self.rbm_stack["vis--hid"].get_h_given_v_dir(htov)[0]
 
                 """
                 update generative parameters :
                 here you will only use "update_generate_params" method from rbm class
                 """
-
+                self.rbm_stack["vis--hid"].update_generate_params(self,vtoh,mini_batch,pred_htov)
+                self.rbm_stack["hid--pen"].update_generate_params(self,htop,vtoh,pred_ptoh)
+        
                 """
                 update parameters of top rbm:
                 here you will only use "update_params" method from rbm class
                 """
+                self.rbm_stack["pen+lbl--top"].update_params(self,htop,ptot,v_k,h_k)
 
                 """
                 update generative parameters :
                 here you will only use "update_recognize_params" method from rbm class
                 """
+                self.rbm_stack["hid--pen"].update_recognize_params(self,ptoh,ttop,pred_htop)
+                self.rbm_stack["vis--hid"].update_recognize_params(self,htov,ptoh,pred_vtoh)        
+
 
                 if it % self.print_period == 0 : print ("iteration=%7d"%it)
 

@@ -93,7 +93,7 @@ if __name__ == "__main__":
 
     ''' greedy layer-wise training '''
 
-    dbn.train_greedylayerwise(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=2000)
+    dbn.train_greedylayerwise(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=3000)
 
     dbn.recognize(train_imgs, train_lbls)
     #
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     #
     # ''' fine-tune wake-sleep training '''
     #
-    # dbn.train_wakesleep_finetune(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=2000)
+    # dbn.train_wakesleep_finetune(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=3000)
     #
     # dbn.recognize(train_imgs, train_lbls)
     #
