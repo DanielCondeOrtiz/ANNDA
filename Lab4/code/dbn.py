@@ -1,5 +1,6 @@
 from util import *
 from rbm import RestrictedBoltzmannMachine
+import random
 
 class DeepBeliefNet():
 
@@ -42,7 +43,7 @@ class DeepBeliefNet():
 
         self.batch_size = batch_size
 
-        self.n_gibbs_recog = 1#15
+        self.n_gibbs_recog = 15
 
         self.n_gibbs_gener = 200
 
@@ -61,6 +62,8 @@ class DeepBeliefNet():
           true_lbl: true labels shaped (number of samples, size of label layer). Used only for calculating accuracy, not driving the net
         """
 
+        print("Recognizing")
+
         n_samples = true_img.shape[0]
 
         vis = true_img # visible layer gets the image data
@@ -69,13 +72,28 @@ class DeepBeliefNet():
         input = self.rbm_stack["hid--pen"].get_h_given_v_dir(self.rbm_stack["vis--hid"].get_h_given_v_dir(vis)[0])[0]
         l_k = np.append(input,lbl,axis=1)
 
+
+        error = []
+        x = []
+
         for i in range(self.n_gibbs_recog):
-            print(i)
+            print("Loop: " + str(i))
             #top layer
             t_k = self.rbm_stack["pen+lbl--top"].get_h_given_v(l_k)[0]
             #lower layer
             l_k = self.rbm_stack["pen+lbl--top"].get_v_given_h(t_k)[0]
 
+            error.append(np.linalg.norm(l_k[:,-10:] - true_lbl))
+            x.append(i)
+
+        fig, ax = plt.subplots()
+        ax.plot(x, error)
+
+        ax.set(xlabel='Gibbs steps', ylabel='Recognition loss',
+               title='Average recognition loss')
+
+        fig.savefig("recon_loss_" + str(true_lbl.shape[0]) + ".png")
+        plt.show()
 
         predicted_lbl = l_k[:,-true_lbl.shape[1]:]
 
@@ -91,6 +109,7 @@ class DeepBeliefNet():
           true_lbl: true labels shaped (number of samples, size of label layer)
           name: string used for saving a video of generated visible activations
         """
+        print("Generating image: " + str(np.argmax(true_lbl)))
 
         n_sample = true_lbl.shape[0]
 
@@ -107,16 +126,16 @@ class DeepBeliefNet():
         l_k = np.append(output,lbl)
 
         for i in range(self.n_gibbs_gener):
-            print(i)
-
             #top layer
             t_k = self.rbm_stack["pen+lbl--top"].get_h_given_v(l_k)[0]
+            t_k_b = self.rbm_stack["pen+lbl--top"].get_h_given_v(l_k)[1]
             #lower layer
             l_k = self.rbm_stack["pen+lbl--top"].get_v_given_h(t_k)[0]
+            l_k_b = self.rbm_stack["pen+lbl--top"].get_v_given_h(t_k_b)[1]
 
-            h_k = self.rbm_stack["hid--pen"].get_v_given_h_dir(l_k[:-10])[0]
+            h_k_b = self.rbm_stack["hid--pen"].get_v_given_h_dir(l_k_b[:-10])[1]
 
-            vis = self.rbm_stack["vis--hid"].get_v_given_h_dir(h_k)[0]
+            vis = self.rbm_stack["vis--hid"].get_v_given_h_dir(h_k_b)[0]
 
             records.append( [ ax.imshow(vis.reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None) ] )
 
@@ -177,6 +196,50 @@ class DeepBeliefNet():
             self.rbm_stack["pen+lbl--top"].cd1(visible_trainset=input2, n_iterations=300,max_epochs=1,bool_print=False)
 
             self.savetofile_rbm(loc="trained_rbm",name="pen+lbl--top")
+
+        print("Checking reconstruction")
+        rec_rbm = np.linalg.norm(vis_trainset - self.rbm_stack["vis--hid"].get_v_given_h_dir(self.rbm_stack["vis--hid"].get_h_given_v_dir(vis_trainset)[0])[0])
+
+        vtoh = self.rbm_stack["vis--hid"].get_h_given_v_dir(vis_trainset)[0]
+        htop = self.rbm_stack["hid--pen"].get_h_given_v_dir(vtoh)[0]
+        ptot = self.rbm_stack["pen+lbl--top"].get_h_given_v(np.append(htop,lbl_trainset,axis=1))[0]
+
+        ttop = self.rbm_stack["pen+lbl--top"].get_v_given_h(ptot)[0]
+        ptoh = self.rbm_stack["hid--pen"].get_v_given_h_dir(ttop[:,:-10])[0]
+        htov = self.rbm_stack["vis--hid"].get_v_given_h_dir(ptoh)[0]
+
+        rec_dbn = np.linalg.norm(vis_trainset - htov)
+
+        print(rec_rbm)
+        print(rec_dbn)
+
+        num = random.randint(1,vis_trainset.shape[0]+1)
+
+        fig,ax = plt.subplots(1,1,figsize=(3,3))#,constrained_layout=True)
+        plt.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+        ax.imshow(htov[num,:].reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None)
+        fig.savefig("recons_dbn.png")
+
+        fig,ax = plt.subplots(1,1,figsize=(3,3))#,constrained_layout=True)
+        plt.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+        ax.imshow(vis_trainset[num,:].reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None)
+        fig.savefig("recons_orig.png")
+
+        htov = self.rbm_stack["vis--hid"].get_v_given_h_dir(vtoh)[0]
+
+        fig,ax = plt.subplots(1,1,figsize=(3,3))#,constrained_layout=True)
+        plt.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+        ax.imshow(htov[num,:].reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None)
+        fig.savefig("recons_rbm.png")
 
         return
 

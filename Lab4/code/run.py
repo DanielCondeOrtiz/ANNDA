@@ -3,29 +3,6 @@ from rbm import RestrictedBoltzmannMachine
 from dbn import DeepBeliefNet
 import threading
 
-def train_net_epochs(epochs):
-    print("Starting network with " + str(epochs) + " epochs, " + str(epochs*1000) + " iterations")
-    rbm = RestrictedBoltzmannMachine(ndim_visible=image_size[0]*image_size[1],
-                                     ndim_hidden=500,
-                                     is_bottom=True,
-                                     image_size=image_size,
-                                     is_top=False,
-                                     n_labels=10,
-                                     batch_size=20
-    )
-
-    rbm.cd1(visible_trainset=train_imgs, n_iterations=epochs * 1000)
-
-def call_epochs():
-    threads = []
-    for i in range(6):
-        t = threading.Thread(target=train_net_epochs, args=(10+i*2,))
-        threads.append(t)
-        t.start()
-
-    for th in threads:
-        th.join()
-
 
 def train_net_units(units,n_epochs,results):
     print("Starting network with " + str((units+2)*100) + " units")
@@ -39,7 +16,7 @@ def train_net_units(units,n_epochs,results):
     )
 
     res = rbm.cd1(visible_trainset=train_imgs, max_epochs=n_epochs, n_iterations=3000, bool_print=True)
-    
+
     results[units,:] = res
 
 
@@ -47,9 +24,9 @@ def call_units():
     threads = []
     units = [200,300,400,500]
     n_epochs = 2
-    
+
     n_units = len(units)
-    
+
     results = np.zeros((n_units,n_epochs))
     for i in range(n_units):
         t = threading.Thread(target=train_net_units, args=(i,n_epochs,results))
@@ -67,12 +44,12 @@ def call_units():
 
     fig.savefig("hidden_loss.png")
     plt.show()
-    
+
     fig, ax = plt.subplots()
-    
+
     for i in range(n_units):
         ax.plot(np.arange(1,n_epochs+1),np.transpose(results[i,0:n_epochs]))
-    
+
     ax.set(xlabel='Epochs', ylabel='Reconstruction loss', title='Reconstruction loss over epochs',xticks=np.arange(1,n_epochs+1), legend = ('N_h=200', 'N_h=300', 'N_h=400', 'N_h=500'))
 
     fig.savefig("epochs_loss.png")
@@ -88,7 +65,7 @@ if __name__ == "__main__":
     print ("\nStarting a Restricted Boltzmann Machine..")
 
 
-    #basic
+    #first point
 
 #    rbm = RestrictedBoltzmannMachine(ndim_visible=image_size[0]*image_size[1],
 #                                     ndim_hidden=500,
@@ -101,12 +78,8 @@ if __name__ == "__main__":
 
     #recon_loss_ep = rbm.cd1(visible_trainset=train_imgs, n_iterations=3000, max_epochs=20, bool_print=True)
 
-    #first point
-    #threads so it doesn't take forever
-    #call_epochs()
-
     #second point
-    call_units()
+    #call_units()
 
     ''' deep- belief net '''
 
@@ -123,13 +96,13 @@ if __name__ == "__main__":
     dbn.train_greedylayerwise(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=2000)
 
     dbn.recognize(train_imgs, train_lbls)
-
-    dbn.recognize(test_imgs, test_lbls)
-
-    for digit in range(10):
-        digit_1hot = np.zeros(shape=(1,10))
-        digit_1hot[0,digit] = 1
-        dbn.generate(digit_1hot, name="rbms")
+    #
+    # dbn.recognize(test_imgs, test_lbls)
+    #
+    # for digit in range(10):
+    #     digit_1hot = np.zeros(shape=(1,10))
+    #     digit_1hot[0,digit] = 1
+    #     dbn.generate(digit_1hot, name="rbms")
     #
     # ''' fine-tune wake-sleep training '''
     #
