@@ -76,7 +76,7 @@ class RestrictedBoltzmannMachine():
         return
 
 
-    def cd1(self,visible_trainset, n_iterations=3000):
+    def cd1(self,visible_trainset, max_epochs=20, n_iterations=3000, bool_print=True):
 
         """Contrastive Divergence with k=1 full alternating Gibbs sampling
 
@@ -88,8 +88,10 @@ class RestrictedBoltzmannMachine():
         print ("learning CD1")
 
         #n_samples = visible_trainset.shape[0]
+        
+        epoch_max = max_epochs
 
-        epoch_max = 20
+        recon_loss_ep = np.zeros((epoch_max))
         
         for epoch in range(epoch_max):
             start = time.time()            
@@ -105,18 +107,18 @@ class RestrictedBoltzmannMachine():
     
                 # positive phase
                 v_0 = visible_trainset[self.batch_size*(it):self.batch_size*(it+1)]
-                h_0 = self.get_h_given_v(v_0)[1]
+                h_0 = self.get_h_given_v(v_0)[0]
     
                 # negative phase
-                v_k = self.get_v_given_h(h_0)[1]
-                h_k = self.get_h_given_v(v_k)[1]
+                v_k = self.get_v_given_h(h_0)[0]
+                h_k = self.get_h_given_v(v_k)[0]
     
                 # updating parameters
                 self.update_params(v_0,h_0,v_k,h_k)
     
                 # visualize once in a while when visible layer is input images
     
-                if it % (self.rf["period"] -1) == 0 and self.is_bottom:
+                if it % (self.rf["period"] -1) == 0 and self.is_bottom and bool_print:
     
                     viz_rf(weights=self.weight_vh[:,self.rf["ids"]].reshape((self.image_size[0],self.image_size[1],-1)), it=it, grid=self.rf["grid"], total_it=n_iterations,units=self.ndim_hidden,epochs=epoch)
     
@@ -126,14 +128,16 @@ class RestrictedBoltzmannMachine():
                 #it was (visible_trainset - visible_trainset)
                 if it % (self.print_period -1) == 0 :
     
-                    print ("Iterations=%5d, units=%3d, iteration=%5d recon_loss=%4.4f"%(n_iterations,self.ndim_hidden,it+1, np.linalg.norm(visible_trainset - self.get_v_given_h(self.get_h_given_v(visible_trainset)[1])[1])))
+                    print ("Iterations=%5d, units=%3d, iteration=%5d recon_loss=%4.4f"%(n_iterations,self.ndim_hidden,it+1, np.linalg.norm(visible_trainset - self.get_v_given_h(self.get_h_given_v(visible_trainset)[0])[0])))
+
+            recon_loss_ep[epoch] = np.linalg.norm(visible_trainset - self.get_v_given_h(self.get_h_given_v(visible_trainset)[0])[0])
 
             end = time.time()
             print("time for epoch "+ str(epoch) +": "+str(end - start)+"s")
     
 
         #maybe mean, i dont know
-        return np.linalg.norm(visible_trainset - self.get_v_given_h(self.get_h_given_v(visible_trainset)[1])[1])
+        return recon_loss_ep
 
 
     def update_params(self,v_0,h_0,v_k,h_k):

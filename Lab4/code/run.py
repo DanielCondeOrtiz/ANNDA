@@ -28,7 +28,7 @@ def call_epochs():
 
 
 def train_net_units(units,results):
-    print("Starting network with " + str((units+2)*100) + " units, 10000 iterations")
+    print("Starting network with " + str((units+2)*100) + " units")
     rbm = RestrictedBoltzmannMachine(ndim_visible=image_size[0]*image_size[1],
                                      ndim_hidden=(units+2)*100,
                                      is_bottom=True,
@@ -38,13 +38,14 @@ def train_net_units(units,results):
                                      batch_size=20
     )
 
-    res = rbm.cd1(visible_trainset=train_imgs, n_iterations=10000)
-    results[units] = res
+    res = rbm.cd1(visible_trainset=train_imgs, max_epochs=1, n_iterations=3000, bool_print=True)
+    
+    results[units,:] = res
 
 
 def call_units():
     threads = []
-    results = [0,0,0,0]
+    results = np.zeros((4,20))
     for i in range(4):
         t = threading.Thread(target=train_net_units, args=(i,results))
         threads.append(t)
@@ -76,23 +77,23 @@ if __name__ == "__main__":
 
     #basic
 
-    rbm = RestrictedBoltzmannMachine(ndim_visible=image_size[0]*image_size[1],
-                                     ndim_hidden=500,
-                                     is_bottom=True,
-                                     image_size=image_size,
-                                     is_top=False,
-                                     n_labels=10,
-                                     batch_size=20
-    )
+#    rbm = RestrictedBoltzmannMachine(ndim_visible=image_size[0]*image_size[1],
+#                                     ndim_hidden=500,
+#                                     is_bottom=True,
+#                                     image_size=image_size,
+#                                     is_top=False,
+#                                     n_labels=10,
+#                                     batch_size=20
+#    )
 
-    rbm.cd1(visible_trainset=train_imgs, n_iterations=3000)
+    #recon_loss_ep = rbm.cd1(visible_trainset=train_imgs, n_iterations=3000, max_epochs=20, bool_print=True)
 
     #first point
     #threads so it doesn't take forever
     #call_epochs()
 
     #second point
-    # call_units()
+    call_units()
 
     ''' deep- belief net '''
 
