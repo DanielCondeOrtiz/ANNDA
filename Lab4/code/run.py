@@ -27,7 +27,7 @@ def call_epochs():
         th.join()
 
 
-def train_net_units(units,results):
+def train_net_units(units,n_epochs,results):
     print("Starting network with " + str((units+2)*100) + " units")
     rbm = RestrictedBoltzmannMachine(ndim_visible=image_size[0]*image_size[1],
                                      ndim_hidden=(units+2)*100,
@@ -38,23 +38,27 @@ def train_net_units(units,results):
                                      batch_size=20
     )
 
-    res = rbm.cd1(visible_trainset=train_imgs, max_epochs=1, n_iterations=3000, bool_print=True)
+    res = rbm.cd1(visible_trainset=train_imgs, max_epochs=n_epochs, n_iterations=3000, bool_print=True)
     
     results[units,:] = res
 
 
 def call_units():
     threads = []
-    results = np.zeros((4,20))
-    for i in range(4):
-        t = threading.Thread(target=train_net_units, args=(i,results))
+    units = [200,300,400,500]
+    n_epochs = 2
+    
+    n_units = len(units)
+    
+    results = np.zeros((n_units,n_epochs))
+    for i in range(n_units):
+        t = threading.Thread(target=train_net_units, args=(i,n_epochs,results))
         threads.append(t)
         t.start()
 
     for th in threads:
         th.join()
 
-    units = [200,300,400,500]
     fig, ax = plt.subplots()
     ax.plot(units, results)
 
@@ -63,7 +67,16 @@ def call_units():
 
     fig.savefig("hidden_loss.png")
     plt.show()
+    
+    fig, ax = plt.subplots()
+    
+    for i in range(n_units):
+        ax.plot(np.arange(1,n_epochs+1),np.transpose(results[i,0:n_epochs]))
+    
+    ax.set(xlabel='Epochs', ylabel='Reconstruction loss', title='Reconstruction loss over epochs',xticks=np.arange(1,n_epochs+1), legend = ('N_h=200', 'N_h=300', 'N_h=400', 'N_h=500'))
 
+    fig.savefig("epochs_loss.png")
+    plt.show()
 
 if __name__ == "__main__":
 
