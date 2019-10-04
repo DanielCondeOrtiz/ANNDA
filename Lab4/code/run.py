@@ -50,7 +50,8 @@ def call_units():
     for i in range(n_units):
         ax.plot(np.arange(1,n_epochs+1),np.transpose(results[i,0:n_epochs]))
 
-    ax.set(xlabel='Epochs', ylabel='Reconstruction loss', title='Reconstruction loss over epochs',xticks=np.arange(1,n_epochs+1), legend = ('N_h=200', 'N_h=300', 'N_h=400', 'N_h=500'))
+    ax.set(xlabel='Epochs', ylabel='Reconstruction loss', title='Reconstruction loss over epochs',xticks=np.arange(1,n_epochs+1))
+    ax.legend = (('N_h=200', 'N_h=300', 'N_h=400', 'N_h=500'))
 
     fig.savefig("epochs_loss.png")
     plt.show()
@@ -75,11 +76,11 @@ if __name__ == "__main__":
 #                                     n_labels=10,
 #                                     batch_size=20
 #    )
-
-    #recon_loss_ep = rbm.cd1(visible_trainset=train_imgs, n_iterations=3000, max_epochs=20, bool_print=True)
+#
+#    recon_loss_ep = rbm.cd1(visible_trainset=train_imgs, n_iterations=3000, max_epochs=20, bool_print=True)
 
     #second point
-    #call_units()
+    call_units()
 
     ''' deep- belief net '''
 
