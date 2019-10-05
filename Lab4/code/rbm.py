@@ -54,7 +54,7 @@ class RestrictedBoltzmannMachine():
 
         self.learning_rate = 0.01
 
-        self.momentum = 0.7
+        self.momentum = 0
 
         # velocities of momentum method
         self.w_v = np.zeros((self.ndim_visible,self.ndim_hidden))
@@ -62,7 +62,7 @@ class RestrictedBoltzmannMachine():
         self.v_v = np.zeros((self.ndim_visible))
 
         #weight decay (L2)
-        self.w_decay = 0.0001
+        self.w_decay = 0
 
         self.print_period = 1500
 
@@ -217,15 +217,26 @@ class RestrictedBoltzmannMachine():
             support = self.bias_v + np.dot(hidden_minibatch,np.transpose(self.weight_vh))
 
             if(len(hidden_minibatch.shape) == 1):
-                pv_labels = sigmoid(support[-self.n_labels:])
+                pv_labels = softmax(support[-self.n_labels:],only=True)
                 pv_act= sigmoid(support[:-self.n_labels])
-                pv = np.append(pv_labels,pv_act)
-            else:
-                pv_labels = sigmoid(support[:, -self.n_labels:])
-                pv_act= sigmoid(support[:, :-self.n_labels])
-                pv = np.append(pv_labels,pv_act,axis=1)
+                pv = np.append(pv_act,pv_labels)
 
-            v = np.where(pv>0.5, 1, 0)
+                v_labels = np.zeros(pv_labels.shape)
+                v_labels[np.argmax(pv_labels)] = 1
+                v_act = np.where(pv_act>0.5, 1, 0)
+                v = np.append(v_act,v_labels)
+
+            else:
+                pv_labels = softmax(support[:, -self.n_labels:],only=False)
+                pv_act= sigmoid(support[:, :-self.n_labels])
+                pv = np.append(pv_act,pv_labels,axis=1)
+
+                v_labels = np.zeros(pv_labels.shape)
+                for i in range(pv_labels.shape[0]):
+                    v_labels[i,np.argmax(pv_labels[i,:])] = 1
+
+                v_act = np.where(pv_act>0.5, 1, 0)
+                v = np.append(v_act,v_labels,axis=1)
 
         else:
             pv = sigmoid(self.bias_v + np.dot(hidden_minibatch,np.transpose(self.weight_vh)))
@@ -285,16 +296,29 @@ class RestrictedBoltzmannMachine():
             Then, for both parts, use the appropriate activation function to get probabilities and a sampling method \
             to get activities. The probabilities as well as activities can then be concatenated back into a normal visible layer.
             """
-            support = self.bias_v + np.dot(hidden_minibatch,np.transpose(self.weight_vh))
+            support = self.bias_v + np.dot(hidden_minibatch,self.weight_h_to_v)
 
             if(len(hidden_minibatch.shape) == 1):
-                pv_labels = sigmoid(support[-self.n_labels:])
+                pv_labels = softmax(support[-self.n_labels:],only=True)
                 pv_act= sigmoid(support[:-self.n_labels])
-                pv = np.append(pv_labels,pv_act)
+                pv = np.append(pv_act,pv_labels)
+
+                v_labels = np.zeros(pv_labels.shape)
+                v_labels[np.argmax(pv_labels)] = 1
+                v_act = np.where(pv_act>0.5, 1, 0)
+                v = np.append(v_act,v_labels)
+
             else:
-                pv_labels = sigmoid(support[:, -self.n_labels:])
+                pv_labels = softmax(support[:, -self.n_labels:],only=False)
                 pv_act= sigmoid(support[:, :-self.n_labels])
-                pv = np.append(pv_labels,pv_act,axis=1)
+                pv = np.append(pv_act,pv_labels,axis=1)
+
+                v_labels = np.zeros(pv_labels.shape)
+                for i in range(pv_labels.shape[0]):
+                    v_labels[i,np.argmax(pv_labels[i,:])] = 1
+
+                v_act = np.where(pv_act>0.5, 1, 0)
+                v = np.append(v_act,v_labels,axis=1)
 
         else:
             pv = sigmoid(self.bias_v + np.dot(hidden_minibatch,self.weight_h_to_v))

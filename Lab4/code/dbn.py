@@ -81,9 +81,13 @@ class DeepBeliefNet():
             #top layer
             t_k = self.rbm_stack["pen+lbl--top"].get_h_given_v(l_k)[0]
             #lower layer
-            l_k = self.rbm_stack["pen+lbl--top"].get_v_given_h(t_k)[0]
+            l_k,l_k_b = self.rbm_stack["pen+lbl--top"].get_v_given_h(t_k)
 
-            error.append(np.linalg.norm(l_k[:,-10:] - true_lbl))
+            error.append(np.linalg.norm(l_k_b[:,-10:] - true_lbl))
+
+            #for plotting accuracy instead of error
+            #error.append((100.*np.mean(np.argmax(l_k_b[:,-10:],axis=1)==np.argmax(true_lbl,axis=1))))
+
             x.append(i)
 
         fig, ax = plt.subplots()
@@ -95,7 +99,7 @@ class DeepBeliefNet():
         fig.savefig("recon_loss_" + str(true_lbl.shape[0]) + ".png")
         plt.show()
 
-        predicted_lbl = l_k[:,-true_lbl.shape[1]:]
+        predicted_lbl = l_k_b[:,-10:]
 
         print ("accuracy = %.2f%%"%(100.*np.mean(np.argmax(predicted_lbl,axis=1)==np.argmax(true_lbl,axis=1))))
 
@@ -121,14 +125,13 @@ class DeepBeliefNet():
 
         lbl = true_lbl
 
-        output = np.ones(self.sizes["pen"])/10. # start the net by telling you know nothing about labels
+        output = np.random.rand(self.sizes["pen"]) # start the net by telling you know nothing about
 
         l_k = np.append(output,lbl)
 
         for i in range(self.n_gibbs_gener):
             #top layer
-            t_k = self.rbm_stack["pen+lbl--top"].get_h_given_v(l_k)[0]
-            t_k_b = self.rbm_stack["pen+lbl--top"].get_h_given_v(l_k)[1]
+            t_k,t_k_b = self.rbm_stack["pen+lbl--top"].get_h_given_v(l_k)
             #lower layer
             l_k = self.rbm_stack["pen+lbl--top"].get_v_given_h(t_k)[0]
             l_k_b = self.rbm_stack["pen+lbl--top"].get_v_given_h(t_k_b)[1]
@@ -172,7 +175,7 @@ class DeepBeliefNet():
             """
             CD-1 training for vis--hid
             """
-            self.rbm_stack["vis--hid"].cd1(visible_trainset=vis_trainset, n_iterations=300,max_epochs=1,bool_print=False)
+            self.rbm_stack["vis--hid"].cd1(visible_trainset=vis_trainset, n_iterations=3000,max_epochs=15,bool_print=False)
 
             self.savetofile_rbm(loc="trained_rbm",name="vis--hid")
 
@@ -182,7 +185,7 @@ class DeepBeliefNet():
             CD-1 training for hid--pen
             """
             input1 = self.rbm_stack["vis--hid"].get_h_given_v_dir(vis_trainset)[0]
-            self.rbm_stack["hid--pen"].cd1(visible_trainset=input1, n_iterations=300,max_epochs=1,bool_print=False)
+            self.rbm_stack["hid--pen"].cd1(visible_trainset=input1, n_iterations=3000,max_epochs=15,bool_print=False)
 
             self.savetofile_rbm(loc="trained_rbm",name="hid--pen")
 
@@ -193,7 +196,7 @@ class DeepBeliefNet():
             """
 
             input2 = np.append(self.rbm_stack["hid--pen"].get_h_given_v_dir(input1)[0],lbl_trainset,axis=1)
-            self.rbm_stack["pen+lbl--top"].cd1(visible_trainset=input2, n_iterations=300,max_epochs=1,bool_print=False)
+            self.rbm_stack["pen+lbl--top"].cd1(visible_trainset=input2, n_iterations=3000,max_epochs=15,bool_print=False)
 
             self.savetofile_rbm(loc="trained_rbm",name="pen+lbl--top")
 
@@ -210,8 +213,8 @@ class DeepBeliefNet():
 
         rec_dbn = np.linalg.norm(vis_trainset - htov)
 
-        print(rec_rbm)
-        print(rec_dbn)
+        print("Reconstruction RBM: " + str(rec_rbm))
+        print("Reconstruction DBN: " + str(rec_dbn))
 
         num = random.randint(1,vis_trainset.shape[0]+1)
 
@@ -273,14 +276,15 @@ class DeepBeliefNet():
                 wake-phase : drive the network bottom-to-top using visible and label data
                 """
                 mini_batch = vis_trainset[self.batch_size*(it):self.batch_size*(it+1)]
-                
+                mini_lbl = lbl_trainset[self.batch_size*(it):self.batch_size*(it+1)]
+
                 vtoh = self.rbm_stack["vis--hid"].get_h_given_v_dir(mini_batch)[0]
                 htop = self.rbm_stack["hid--pen"].get_h_given_v_dir(vtoh)[0]
-                ptot = self.rbm_stack["pen+lbl--top"].get_h_given_v(np.append(htop,lbl_trainset,axis=1))[0]
-                     
+                ptot = self.rbm_stack["pen+lbl--top"].get_h_given_v(np.append(htop,mini_lbl,axis=1))[0]
+
                 v_k = htop
                 h_k = ptot
-         
+
                 """
                 alternating Gibbs sampling in the top RBM : also store neccessary information for learning this RBM
                 """
@@ -292,8 +296,8 @@ class DeepBeliefNet():
                 """
                 sleep phase : from the activities in the top RBM, drive the network top-to-bottom
                 """
-                ptot = h_k                
-                
+                ptot = h_k
+
                 ttop = self.rbm_stack["pen+lbl--top"].get_v_given_h(ptot)[0]
                 ptoh = self.rbm_stack["hid--pen"].get_v_given_h_dir(ttop[:,:-10])[0]
                 htov = self.rbm_stack["vis--hid"].get_v_given_h_dir(ptoh)[0]
@@ -312,24 +316,24 @@ class DeepBeliefNet():
                 update generative parameters :
                 here you will only use "update_generate_params" method from rbm class
                 """
-                self.rbm_stack["vis--hid"].update_generate_params(self,vtoh,mini_batch,pred_htov)
-                self.rbm_stack["hid--pen"].update_generate_params(self,htop,vtoh,pred_ptoh)
-        
+                self.rbm_stack["vis--hid"].update_generate_params(vtoh,mini_batch,pred_htov)
+                self.rbm_stack["hid--pen"].update_generate_params(htop,vtoh,pred_ptoh)
+
                 """
                 update parameters of top rbm:
                 here you will only use "update_params" method from rbm class
                 """
-                self.rbm_stack["pen+lbl--top"].update_params(self,htop,ptot,v_k,h_k)
+                self.rbm_stack["pen+lbl--top"].update_params(np.append(htop,mini_lbl,axis=1),ptot,v_k,h_k)
 
                 """
-                update generative parameters :
+                update recognize parameters :
                 here you will only use "update_recognize_params" method from rbm class
                 """
-                self.rbm_stack["hid--pen"].update_recognize_params(self,ptoh,ttop,pred_htop)
-                self.rbm_stack["vis--hid"].update_recognize_params(self,htov,ptoh,pred_vtoh)        
+                self.rbm_stack["hid--pen"].update_recognize_params(ptoh,ttop[:,:-10],pred_htop)
+                self.rbm_stack["vis--hid"].update_recognize_params(htov,ptoh,pred_vtoh)
 
 
-                if it % self.print_period == 0 : print ("iteration=%7d"%it)
+                if it % 250 == 0 : print ("iteration=%7d"%it)
 
             self.savetofile_dbn(loc="trained_dbn",name="vis--hid")
             self.savetofile_dbn(loc="trained_dbn",name="hid--pen")

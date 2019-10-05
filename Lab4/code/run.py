@@ -1,6 +1,7 @@
 from util import *
 from rbm import RestrictedBoltzmannMachine
 from dbn import DeepBeliefNet
+from dbn2 import DeepBeliefNet2
 import threading
 
 
@@ -80,7 +81,7 @@ if __name__ == "__main__":
 #    recon_loss_ep = rbm.cd1(visible_trainset=train_imgs, n_iterations=3000, max_epochs=20, bool_print=True)
 
     #second point
-    call_units()
+    #call_units()
 
     ''' deep- belief net '''
 
@@ -96,24 +97,48 @@ if __name__ == "__main__":
 
     dbn.train_greedylayerwise(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=3000)
 
-    dbn.recognize(train_imgs, train_lbls)
-    #
+    # dbn.recognize(train_imgs, train_lbls)
+
     # dbn.recognize(test_imgs, test_lbls)
-    #
+
     # for digit in range(10):
     #     digit_1hot = np.zeros(shape=(1,10))
     #     digit_1hot[0,digit] = 1
     #     dbn.generate(digit_1hot, name="rbms")
     #
-    # ''' fine-tune wake-sleep training '''
+    ''' fine-tune wake-sleep training '''
     #
-    # dbn.train_wakesleep_finetune(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=3000)
+    dbn.train_wakesleep_finetune(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=3000)
     #
-    # dbn.recognize(train_imgs, train_lbls)
+    dbn.recognize(train_imgs, train_lbls)
+
+    dbn.recognize(test_imgs, test_lbls)
+
+    for digit in range(10):
+        digit_1hot = np.zeros(shape=(1,10))
+        digit_1hot[0,digit] = 1
+        dbn.generate(digit_1hot, name="dbn")
+
+
+    ''' last-part '''
+
+    # dbn2 = DeepBeliefNet2(sizes={"vis":image_size[0]*image_size[1], "hid":500, "pen":500, "top":2000, "lbl":10},
+    #                     image_size=image_size,
+    #                     n_labels=10,
+    #                     batch_size=10
+    # )
     #
-    # dbn.recognize(test_imgs, test_lbls)
+    # dbn2.train_greedylayerwise(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=3000)
+    #
+    #
+    # #
+    # dbn2.train_wakesleep_finetune(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=3000)
+    #
+    # dbn2.recognize(train_imgs, train_lbls)
+    #
+    # dbn2.recognize(test_imgs, test_lbls)
     #
     # for digit in range(10):
     #     digit_1hot = np.zeros(shape=(1,10))
     #     digit_1hot[0,digit] = 1
-    #     dbn.generate(digit_1hot, name="dbn")
+    #     dbn2.generate(digit_1hot, name="dbn")

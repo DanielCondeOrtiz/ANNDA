@@ -17,7 +17,7 @@ def sigmoid(support):
     on_probabilities = 1./(1.+np.exp(-support))
     return on_probabilities
 
-def softmax(support):
+def softmax(support,only):
 
     """
     Softmax activation function that finds probabilities of each category
@@ -28,8 +28,13 @@ def softmax(support):
       probabilities: shape is (size of mini-batch, number of categories)
     """
 
-    expsup = np.exp(support-np.sum(support,axis=1)[:,None])
-    return expsup / np.sum(expsup,axis=1)[:,None]
+    if only:
+        expsup = np.exp(support-np.sum(support))
+        return expsup / np.sum(expsup)
+
+    else:
+        expsup = np.exp(support-np.sum(support,axis=1)[:,None])
+        return expsup / np.sum(expsup,axis=1)[:,None]
 
 def sample_binary(on_probabilities):
 
