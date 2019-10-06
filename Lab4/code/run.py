@@ -95,21 +95,22 @@ if __name__ == "__main__":
 
     ''' greedy layer-wise training '''
 
-    dbn.train_greedylayerwise(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=3000)
+    #6000 iterations because batch size = 10
+    dbn.train_greedylayerwise(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=6000)
 
     # dbn.recognize(train_imgs, train_lbls)
-
+    #
     # dbn.recognize(test_imgs, test_lbls)
-
+    #
     # for digit in range(10):
     #     digit_1hot = np.zeros(shape=(1,10))
     #     digit_1hot[0,digit] = 1
     #     dbn.generate(digit_1hot, name="rbms")
     #
     ''' fine-tune wake-sleep training '''
-    #
-    dbn.train_wakesleep_finetune(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=3000)
-    #
+
+    dbn.train_wakesleep_finetune(vis_trainset=train_imgs, lbl_trainset=train_lbls, n_iterations=6000)
+
     dbn.recognize(train_imgs, train_lbls)
 
     dbn.recognize(test_imgs, test_lbls)
@@ -122,7 +123,7 @@ if __name__ == "__main__":
 
     ''' last-part '''
 
-    # dbn2 = DeepBeliefNet2(sizes={"vis":image_size[0]*image_size[1], "hid":500, "pen":500, "top":2000, "lbl":10},
+    # dbn2 = DeepBeliefNet2(sizes={"vis":image_size[0]*image_size[1], "pen":500, "top":2000, "lbl":10},
     #                     image_size=image_size,
     #                     n_labels=10,
     #                     batch_size=10
@@ -137,8 +138,3 @@ if __name__ == "__main__":
     # dbn2.recognize(train_imgs, train_lbls)
     #
     # dbn2.recognize(test_imgs, test_lbls)
-    #
-    # for digit in range(10):
-    #     digit_1hot = np.zeros(shape=(1,10))
-    #     digit_1hot[0,digit] = 1
-    #     dbn2.generate(digit_1hot, name="dbn")
