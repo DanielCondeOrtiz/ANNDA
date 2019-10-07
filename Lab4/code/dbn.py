@@ -125,7 +125,7 @@ class DeepBeliefNet():
 
         lbl = true_lbl
 
-        output = np.random.rand(self.sizes["pen"]) # start the net by telling you know nothing about
+        output = self.rbm_stack["hid--pen"].get_h_given_v_dir(self.rbm_stack["vis--hid"].get_h_given_v_dir(np.random.rand(self.sizes["vis"]))[0])[0] # start the net by telling you know nothing about
 
         l_k = np.append(output,lbl)
 
