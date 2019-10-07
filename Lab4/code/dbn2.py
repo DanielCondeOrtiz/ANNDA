@@ -27,7 +27,7 @@ class DeepBeliefNet2():
 
         self.rbm_stack = {
 
-            'vis--hid' : RestrictedBoltzmannMachine(ndim_visible=sizes["vis"], ndim_hidden=sizes["pen"],
+            'vis--pen' : RestrictedBoltzmannMachine(ndim_visible=sizes["vis"], ndim_hidden=sizes["pen"],
                                                     is_bottom=True, image_size=image_size, batch_size=batch_size),
 
             'pen+lbl--top' : RestrictedBoltzmannMachine(ndim_visible=sizes["pen"]+sizes["lbl"], ndim_hidden=sizes["top"],
@@ -129,7 +129,7 @@ class DeepBeliefNet2():
             """
             CD-1 training for vis--pen
             """
-            self.rbm_stack["vis--pen"].cd1(visible_trainset=vis_trainset, n_iterations=3000,max_epochs=15,bool_print=False)
+            self.rbm_stack["vis--pen"].cd1(visible_trainset=vis_trainset, n_iterations=6000,max_epochs=15,bool_print=False)
 
             self.savetofile_rbm(loc="trained_rbm2",name="vis--pen")
 
@@ -141,7 +141,7 @@ class DeepBeliefNet2():
             """
 
             input2 = np.append(self.rbm_stack["vis--pen"].get_h_given_v_dir(vis_trainset)[0],lbl_trainset,axis=1)
-            self.rbm_stack["pen+lbl--top"].cd1(visible_trainset=input2, n_iterations=3000,max_epochs=15,bool_print=False)
+            self.rbm_stack["pen+lbl--top"].cd1(visible_trainset=input2, n_iterations=6000,max_epochs=15,bool_print=False)
 
             self.savetofile_rbm(loc="trained_rbm2",name="pen+lbl--top")
 
@@ -166,7 +166,7 @@ class DeepBeliefNet2():
         ax.set_xticks([])
         ax.set_yticks([])
 
-        ax.imshow(htov[num,:].reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None)
+        ax.imshow(ptov[num,:].reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None)
         fig.savefig("recons_dbn2.png")
 
         fig,ax = plt.subplots(1,1,figsize=(3,3))#,constrained_layout=True)
@@ -177,14 +177,14 @@ class DeepBeliefNet2():
         ax.imshow(vis_trainset[num,:].reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None)
         fig.savefig("recons_orig2.png")
 
-        htov = self.rbm_stack["vis--hid"].get_v_given_h_dir(vtoh)[0]
+        ptov = self.rbm_stack["vis--pen"].get_v_given_h_dir(vtop)[0]
 
         fig,ax = plt.subplots(1,1,figsize=(3,3))#,constrained_layout=True)
         plt.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
         ax.set_xticks([])
         ax.set_yticks([])
 
-        ax.imshow(htov[num,:].reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None)
+        ax.imshow(ptov[num,:].reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None)
         fig.savefig("recons_rbm2.png")
 
         return
@@ -218,9 +218,10 @@ class DeepBeliefNet2():
                 wake-phase : drive the network bottom-to-top using visible and label data
                 """
                 mini_batch = vis_trainset[self.batch_size*(it):self.batch_size*(it+1)]
+                mini_lbl = lbl_trainset[self.batch_size*(it):self.batch_size*(it+1)]
 
                 vtop = self.rbm_stack["vis--pen"].get_h_given_v_dir(mini_batch)[0]
-                ptot = self.rbm_stack["pen+lbl--top"].get_h_given_v(np.append(vtop,lbl_trainset,axis=1))[0]
+                ptot = self.rbm_stack["pen+lbl--top"].get_h_given_v(np.append(vtop,mini_lbl,axis=1))[0]
 
                 v_k = vtop
                 h_k = ptot
@@ -253,19 +254,19 @@ class DeepBeliefNet2():
                 update generative parameters :
                 here you will only use "update_generate_params" method from rbm class
                 """
-                self.rbm_stack["vis--pen"].update_generate_params(self,vtop,mini_batch,pred_ptov)
+                self.rbm_stack["vis--pen"].update_generate_params(vtop,mini_batch,pred_ptov)
 
                 """
                 update parameters of top rbm:
                 here you will only use "update_params" method from rbm class
                 """
-                self.rbm_stack["pen+lbl--top"].update_params(self,htop,ptot,v_k,h_k)
+                self.rbm_stack["pen+lbl--top"].update_params(np.append(vtop,mini_lbl,axis=1),ptot,v_k,h_k)
 
                 """
                 update generative parameters :
                 here you will only use "update_recognize_params" method from rbm class
                 """
-                self.rbm_stack["vis--pen"].update_recognize_params(self,ptov,ttop,pred_vtop)
+                self.rbm_stack["vis--pen"].update_recognize_params(ptov,ttop[:,:-10],pred_vtop)
 
 
                 if it % self.print_period == 0 : print ("iteration=%7d"%it)
