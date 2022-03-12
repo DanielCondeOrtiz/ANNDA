@@ -1,4 +1,4 @@
-# ANNDA
+# Artificial Neural Networks
 Artificial Neural Networks and Deep Architectures. Course DD2437 given at KTH Royal Institute of Technology.
 
 ## Lab 1 - Feed forward networks
